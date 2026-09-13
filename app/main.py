@@ -2,13 +2,17 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from app.book import book_router, models
 from pydantic import ValidationError
-from app.db import UniqueConstraintError, DomainValidationError, NotFoundError, NotNullViolationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from app.book import book_router
+from app.bill import bill_router
+from app.ndl import ndl_router
+from app.db import UniqueConstraintError, DomainValidationError, NotFoundError, NotNullViolationError
 
 app = FastAPI()
 app.include_router(book_router)
+app.include_router(bill_router)
+app.include_router(ndl_router)
 
 origins = [
     "http://localhost:5173",

@@ -35,8 +35,6 @@ def get(session: Session, key: int) -> dict:
     if work is None:
         raise NotFoundError("データが見つかりませんでした。IDを確認してください")
 
-    print(work.work_detail_record, "DETAIL")
-
     return work.work_detail_record
 
 def create(session: Session, data: CreateSchema) -> Work:

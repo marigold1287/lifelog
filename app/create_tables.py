@@ -1,9 +1,5 @@
 from app.db import Base, engine
-from app.book.models import (
-    Work, Book, WorkAuthor,
-    Author,
-    Publisher, PublisherAlias, Label
-)
+from .models import *
 
 def create_tables(engine):
     Base.metadata.create_all(engine)

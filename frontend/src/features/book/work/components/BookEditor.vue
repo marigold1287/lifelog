@@ -34,6 +34,20 @@
         item.read_records.splice(index, 1)
     }
 
+    const openNdl = async (isbn: string) => {
+        const response = await fetch(
+            `/api/ndl/${isbn}`
+        )
+
+        const json = await response.json()
+
+        if (json) {
+            window.open(json.link, "_blank")
+        }
+    }
+
+    
+
 </script>
 
 <template>
@@ -70,6 +84,14 @@
             label="ISBN"
             density="compact"
             hide-details
+        />
+
+        <v-btn 
+            v-if="item.isbn" 
+            icon="mdi-open-in-new"
+            variant="text" 
+            size="small" 
+            @click="openNdl(item.isbn)" 
         />
 
         <v-text-field

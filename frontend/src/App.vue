@@ -13,6 +13,7 @@
         <v-list-item to="/work" title="Work" />
         <v-list-item to="/publisher" title="Pubilsher" />
         <v-list-item to="/author" title="Author" />
+        <v-list-item to="/bill/electric" title="Electric Bill" />
       </v-list>
     </v-navigation-drawer>
 

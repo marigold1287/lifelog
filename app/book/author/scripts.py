@@ -1,10 +1,8 @@
 import argparse
-from sqlalchemy import delete
 from pathlib import Path
 import pandas as pd
-import numpy as np
 from app.db import SessionLocal
-from .models import AuthorAlias, Author
+from .models import Author
 # from .repository import get_publishers
 
 PWD = Path(__file__).parent

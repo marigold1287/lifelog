@@ -12,6 +12,7 @@
         id: null,
         title: "",
         label: "",
+        yomigana: null,
         label_id: null,
         publisher_record: {id: null, name: ""},
         author_records: [],
