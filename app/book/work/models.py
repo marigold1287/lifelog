@@ -21,6 +21,7 @@ class Work(Base):
     __tablename__ = "work"
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column()
+    yomigana: Mapped[str | None] = mapped_column()
     label_id: Mapped[int] = mapped_column(ForeignKey("label.id"))
 
     label: Mapped["Label"] = relationship(back_populates="works")
@@ -50,6 +51,7 @@ class Work(Base):
         return {
             "id": self.id,
             "publisher_record": self.publisher.publisher_record,
+            "yomigana": self.yomigana,
             # "publisher": self.label.publisher.name,
             # "publisher_aliases": [alias.alias for alias in self.publisher.aliases],
             # "publisher_yomigana": self.publisher.yomigana,

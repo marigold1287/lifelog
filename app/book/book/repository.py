@@ -1,8 +1,7 @@
 
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select
-from app.db import safe_commit, sync_records, NotFoundError
-from .models import Book, BookReading
+from .models import Book
 from app.book.work import Work, WorkAuthor
 from app.book.publisher.models import Label, Publisher
 from app.book.author.models import Author

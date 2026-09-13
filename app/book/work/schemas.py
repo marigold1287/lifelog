@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import date
+from app.db import validate_non_empty_string, DomainValidationError
 
 class AliasRecord(BaseModel):
     id: int | None = None
@@ -22,7 +23,7 @@ class PublisherSchema(BaseModel):
     name: str
     yomigana: str | None = None
     alias_records: list[AliasRecord] = []
-    label_records: list[LabelRecord] = []
+    # label_records: list[LabelRecord] = []
 
 class BookEditSchema(BaseModel):
     id: int | None
@@ -41,6 +42,7 @@ class ReadDateEditSchema(BaseModel):
 class WorkSchema(BaseModel):
     id: int
     title: str
+    yomigana: str | None
     publisher_record: PublisherSchema
     label: str
     label_id: int | None
@@ -51,10 +53,27 @@ class WorkSchema(BaseModel):
     @field_validator("title")
     @classmethod
     def validate_title(cls, value: str) -> str:
-        if not value.strip():
-            raise ValueError("タイトルは必須です")
-        return value
+        try:
+            return validate_non_empty_string(value, "タイトル")
+        except DomainValidationError as e:
+            raise ValueError(str(e)) from e
 
+    @field_validator("publisher_record")
+    @classmethod
+    def validate_publisher_name(cls, value: PublisherSchema) -> PublisherSchema:
+        try:
+            value.name = validate_non_empty_string(value.name, "出版社名")
+            return value
+        except DomainValidationError as e:
+            raise ValueError(str(e)) from e
+
+    @field_validator("label")
+    @classmethod
+    def validate_label(cls, value: str) -> str:
+        try:
+            return validate_non_empty_string(value, "レーベル名")
+        except DomainValidationError as e:
+            raise ValueError(str(e)) from e
 
 
 class ResponseSchema(WorkSchema):

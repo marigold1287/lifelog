@@ -22,6 +22,9 @@
 
     function onPublisherChanged(value: Publisher | string | null) {
         if (typeof value === "string") {
+            value = publishers.value.find(p => p.name == value) ?? value
+        }
+        if (typeof value === "string") {
             publisherRecord.value.name = value
             publisherRecord.value.id = null
         } else if (value === null) {
@@ -32,7 +35,6 @@
             publisherRecord.value.id = value.id
         }
     }
-
 
     function onLabelChanged(value: LabelRecord | string | null) {
         if (typeof value === "string") {

@@ -61,7 +61,6 @@
     onMounted(async () => {
         try {
             work.value = await knockApi<WorkEditRecord>(`/api/work/${route.params.id}`) ?? null;
-            console.log(work)
         } catch (error) {
             if (error instanceof CustomApiError) {
                 alert(error.message);

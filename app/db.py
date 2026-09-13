@@ -41,7 +41,7 @@ class NotNullViolationError(Exception):
 class NotFoundError(Exception):
     pass
 
-class ValidationError(ValueError):
+class DomainValidationError(ValueError):
     pass
 
 
@@ -102,5 +102,5 @@ def safe_commit(session: Session):
 
 def validate_non_empty_string(value: str, field_name: str = "名前") -> str:
     if not value or not value.strip():
-        raise ValidationError(f"空文字列や空白のみの{field_name}は登録できません")
+        raise DomainValidationError(f"空文字列や空白のみの{field_name}は登録できません")
     return value.strip()

@@ -24,6 +24,10 @@ class Author(Base):
         cascade="all, delete-orphan",
     )
 
+    @validates("name")
+    def validate_name(self, key, name):
+        return validate_non_empty_string(name, "著者名")
+
     @property
     def work_records(self):
         return [

@@ -5,9 +5,11 @@ from datetime import date
 class ResponseSchema(BaseModel):
     work_id: int
     title: str
-    publisher_record: PublisherSchema
+    yomigana: str | None
+    publisher_id: int
+    label_id: int
+    author_ids: list[int]
     label: str
-    author_records: list[AuthorSchema]
     subtitle: str | None
     volume: str | None
     registration_date: date

@@ -1,13 +1,11 @@
 <script setup lang="ts">
+    import { ref } from "vue"
     import { validateStringEntered } from "@/validator"
     import type { Author } from "@/types/book"
     import RecordListEditor from "@/components/RecordListEditor.vue"
 
     const author = defineModel<Author>({ required: true })
 
-    const emit = defineEmits<{
-        submit: []
-    }>()
     const props = withDefaults(defineProps<{
         submitButtonLabel?: string
         errorMessage?: string
@@ -16,11 +14,26 @@
         errorMessage: "",
     })
 
+    const emit = defineEmits<{
+        submit: []
+    }>()
+    const form = ref()
+
+    async function onSubmit() {
+        const { valid } = await form.value.validate()
+
+        if (!valid) {
+            return
+        }
+
+        emit("submit")
+    }
+
 </script>
 
 
 <template>
-    <v-form @submit.prevent="emit('submit')">
+    <v-form @submit.prevent="onSubmit" ref="form">
         <h2>氏名</h2>
         <v-text-field
             v-model="author.name"

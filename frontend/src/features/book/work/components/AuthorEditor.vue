@@ -15,6 +15,9 @@
 
     function onAuthorChanged(item: AuthorEditRecord, author: Author | string) {
         if (typeof author === "string") {
+            author = authors.value.find(a => a.name == author) ?? author
+        }
+        if (typeof author === "string") {
             item.name = author
             item.id = null
         } else if (author === null) {

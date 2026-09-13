@@ -31,30 +31,34 @@ def get(session: Session, key: int) -> Publisher:
 def create(session: Session, data: CreateSchema) -> Publisher:
     new_publisher = Publisher(
         name=data.name,
-        yomigana=data.yomigana
+        yomigana=data.yomigana,
     )
-
     session.add(new_publisher)
 
     for alias_record in data.alias_records:
         if alias_record.alias and alias_record.alias.strip():
-            new_alias = PublisherAlias(
-                publisher=new_publisher,
-                alias=alias_record.alias.strip()
+            session.add(
+                PublisherAlias(
+                    publisher=new_publisher,
+                    alias=alias_record.alias.strip(),
+                )
             )
-            session.add(new_alias)
 
-    if "レーベルなし" not in [label.name for label in data.label_records]:
-        data.label_records.append(LabelRecord(id=None, name="レーベルなし")) 
+    label_records = list(data.label_records)
 
-    for label_lecord in data.label_records:
-        print(label_lecord, label_lecord.id, label_lecord.name)
-        if label_lecord.name and label_lecord.name.strip():
-            new_label = Label(
-                publisher=new_publisher,
-                name=label_lecord.name.strip()
+    if not any(label.name == "レーベルなし" for label in label_records):
+        label_records.append(
+            LabelRecord(id=None, name="レーベルなし")
+        )
+
+    for label_record in label_records:
+        if label_record.name and label_record.name.strip():
+            session.add(
+                Label(
+                    publisher=new_publisher,
+                    name=label_record.name.strip(),
+                )
             )
-            session.add(new_label)
 
     safe_commit(session)
     session.refresh(new_publisher)

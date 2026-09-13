@@ -1,8 +1,8 @@
-from app.db import Base, validate_non_empty_string
+from app.db import Base
 from typing import List
 from datetime import date
-from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
-from sqlalchemy import ForeignKey, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import ForeignKey
 
 from typing import List, TYPE_CHECKING
 
@@ -59,6 +59,10 @@ class Book(Base):
         base = {
             "work_id": self.work.id,
             "title": self.work.title,
+            "yomigana": self.work.yomigana,
+            "publisher_id": self.work.publisher.id,
+            "label_id": self.work.label_id,
+            "author_ids": [work_author.author_id for work_author in self.work.work_authors],
             "publisher_record": self.work.publisher.publisher_record,
             "label": self.work.label.name,
             "author_records": self.work.author_records,

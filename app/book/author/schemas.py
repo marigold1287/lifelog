@@ -1,9 +1,17 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.book.work.schemas import WorkSchema
+from app.book.schemas import AliasRecord, AliasValidatorMixin
+from app.db import validate_non_empty_string, DomainValidationError
 
-class AliasRecord(BaseModel):
-    id: int | None = None
-    alias: str
+class ValidatorMixin:
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        try:
+            return validate_non_empty_string(value, "著者名")
+        except DomainValidationError as e:
+            raise ValueError(str(e)) from e
+
 
 
 class BaseSchema(BaseModel):
@@ -12,7 +20,8 @@ class BaseSchema(BaseModel):
     note: str | None = None
     alias_records: list[AliasRecord] = Field(default_factory=list)
 
-class CreateSchema(BaseSchema):
+
+class CreateSchema(ValidatorMixin, AliasValidatorMixin, BaseSchema):
     pass
 
 class ResponseSchema(BaseSchema):
@@ -27,7 +36,7 @@ class ResponseDetailSchema(BaseSchema):
 
     model_config = ConfigDict(from_attributes=True)
 
-class UpdateSchema(BaseSchema):
+class UpdateSchema(ValidatorMixin, AliasValidatorMixin, BaseSchema):
     name: str | None = None
     yomigana: str | None = None
     note: str | None = None

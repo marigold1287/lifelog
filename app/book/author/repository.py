@@ -56,16 +56,14 @@ def update(session: Session, key: int, data: UpdateSchema):
     author.yomigana = data.yomigana
     author.note = data.note
 
-
     sync_records(
         session,
         author.aliases,
         data.alias_records,
         update=lambda alias, record: setattr(alias, "alias", record.alias),
         create=lambda record: author.aliases.append(
-            AuthorAlias(alias=record.alias.strip())
+            AuthorAlias(alias=record.alias)
         ),
-        is_valid=lambda record: bool(record.alias and record.alias.strip()),
     )
 
     safe_commit(session)

@@ -7,17 +7,14 @@
     import PublisherLabelEditor from "@/features/book/work/components/PublisherLabelEditor.vue"
 
     const work = defineModel<WorkEditRecord>({ required: true })
-
-    const emit = defineEmits<{
-        submit: []
-    }>()
-
     const props = withDefaults(defineProps<{
         errorMessage?: string
     }>(), {
         errorMessage: "",
     })
-
+    const emit = defineEmits<{
+        submit: []
+    }>()
     const form = ref()
 
     async function onSubmit() {
@@ -41,6 +38,10 @@
             v-model="work.title"
             :rules="[validateStringEntered]"
             label="書籍名"
+        />
+        <v-text-field
+            v-model="work.yomigana"
+            label="よみがな"
         />
 
         <h2>著者</h2>

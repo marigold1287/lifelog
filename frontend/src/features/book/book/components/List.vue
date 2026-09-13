@@ -13,7 +13,6 @@ import BookList from "@/components/BookList.vue"
 
     onMounted(async () => {
         books.value = await fetchBooks()
-        console.log(books)
     })
 
 </script>
@@ -21,7 +20,7 @@ import BookList from "@/components/BookList.vue"
 
 <template>
     <v-card
-        title="Works"
+        title="Books"
         flat
     >
 

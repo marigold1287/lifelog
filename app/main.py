@@ -3,7 +3,8 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from app.book import book_router, models
-from app.db import UniqueConstraintError, ValidationError, NotFoundError, NotNullViolationError
+from pydantic import ValidationError
+from app.db import UniqueConstraintError, DomainValidationError, NotFoundError, NotNullViolationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 app = FastAPI()
@@ -36,7 +37,7 @@ async def unique_constraint_exception_handler(request: Request, exc: UniqueConst
     )
 
 @app.exception_handler(NotNullViolationError)
-async def unique_constraint_exception_handler(request: Request, exc: UniqueConstraintError):
+async def not_null_violation_handler(request: Request, exc: NotNullViolationError):
     return JSONResponse(
         status_code=409,
         content={
@@ -45,29 +46,29 @@ async def unique_constraint_exception_handler(request: Request, exc: UniqueConst
         }
     )
 
-@app.exception_handler(ValidationError)
-async def unique_constraint_exception_handler(request: Request, exc: ValidationError):
+@app.exception_handler(DomainValidationError)
+async def database_validation_error_handler(request: Request, exc: DomainValidationError):
     return JSONResponse(
         status_code=400,
         content={
-            "code": "validation_error",
+            "code": "database_validation_error",
             "message": str(exc),
         }
     )
 
-
 @app.exception_handler(ValidationError)
-async def unique_constraint_exception_handler(request: Request, exc: ValidationError):
+async def database_validation_error_handler(request: Request, exc: ValidationError):
+    print(exc)
     return JSONResponse(
         status_code=400,
         content={
-            "code": "validation_error",
+            "code": "database_validation_error",
             "message": str(exc),
         }
     )
 
 @app.exception_handler(NotFoundError)
-async def unique_constraint_exception_handler(request: Request, exc: NotFoundError):
+async def not_found_error_handler(request: Request, exc: NotFoundError):
     return JSONResponse(
         status_code=404,
         content={
@@ -113,3 +114,4 @@ async def validation_exception_handler(
             "message": str(error["msg"]).removeprefix("Value error, "),
         },
     )
+

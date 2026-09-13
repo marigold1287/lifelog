@@ -6,7 +6,7 @@ from . import repository
 
 router = APIRouter(prefix="/api/book")
 
-
+# ブックリストというよりは読書記録リストが返される。
 @router.get("", response_model=list[ResponseSchema])
 def get_all(session: Session = Depends(get_session)):
     return repository.get_all(session)

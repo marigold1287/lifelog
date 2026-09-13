@@ -5,4 +5,3 @@ export async function validateStringEntered(value: string) {
 
     return true
 }
-

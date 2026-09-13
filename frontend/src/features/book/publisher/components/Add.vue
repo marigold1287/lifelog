@@ -18,7 +18,6 @@
 
     async function insertPublisher() {
         try {
-            console.log(publisher.value)
             const record = await knockApi<Publisher>(
                 "/api/publisher",
                 {

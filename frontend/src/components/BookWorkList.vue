@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import { ref } from "vue"
-    import type { WorkRecord } from "@/types/book"
+    import type { WorkRecord, Publisher, Author } from "@/types/book"
 
     const props = defineProps<{
         works: WorkRecord[]
@@ -10,7 +10,7 @@
         { title: 'ID', key: 'id' },
         { title: 'Title', key: 'title' },
         { title: 'Authors', key: 'author_records' },
-        { title: 'Publisher', key: 'publisher' },
+        { title: 'Publisher', key: 'publisher_record' },
         { title: 'Label', key: 'label' },
     ]
 
@@ -28,6 +28,7 @@
         const text = [
             work.id,
             work.title,
+            work.yomigana,
             work.publisher_record.name,
             work.publisher_record.yomigana,
             work.label,
@@ -42,6 +43,23 @@
         return text.toLowerCase().includes(query.toLowerCase())
     }
 
+    const customKeySort = {
+        publisher_record: (a: Publisher, b: Publisher) => a.name.localeCompare(b.name),
+        author_records: (a: Author[], b: Author[]) => {
+            const aNames = [...a]
+                .sort((x, y) => x.name.localeCompare(y.name, "ja"))
+                .map(author => author.name)
+                .join(", ")
+
+            const bNames = [...b]
+                .sort((x, y) => x.name.localeCompare(y.name, "ja"))
+                .map(author => author.name)
+                .join(", ")
+
+            return aNames.localeCompare(bNames, "ja")
+        },
+        title: (a: string, b: string) => a.localeCompare(b, "ja"),
+    }
 
 </script>
 
@@ -60,6 +78,7 @@
         :custom-filter="customFilter"
         :items="works"
         :search="search"
+        :custom-key-sort="customKeySort"
     >
         <template #item.id="{ item }">
             <RouterLink :to="`/work/${item.id}`">
@@ -78,7 +97,7 @@
             </template>
         </template>
 
-        <template #item.publisher="{ item }">
+        <template #item.publisher_record="{ item }">
             <RouterLink :to="`/publisher/${item.publisher_record.id}`">
                 {{ item.publisher_record.name }}
             </RouterLink>

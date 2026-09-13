@@ -27,6 +27,7 @@ export interface WorkRecord {
   author_records: AuthorRecord[]
   publisher_record: Publisher
   title: string
+  yomigana: string | null
   // publisher: string
   // publisher_aliases: string[]
   // publisher_yomigana: string | null
@@ -57,6 +58,7 @@ export interface WorkEditRecord {
   book_records: BookEditRecord[]
   id: number | null
   title: string
+  yomigana: string | null
   // publisher: string
   // publisher_id: number | null
   label: string
@@ -94,9 +96,13 @@ export interface AuthorDetail extends Author {
 
 export interface Book {
   work_id: number
+  author_ids: number[]
+  publisher_id: number
+  label_id: number
   author_records: AuthorRecord[]
   publisher_record: Publisher
   title: string
+  yomigana: string | null
   label: string
   subtitle: string | null
   volume: string | null

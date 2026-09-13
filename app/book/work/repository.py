@@ -35,12 +35,15 @@ def get(session: Session, key: int) -> dict:
     if work is None:
         raise NotFoundError("データが見つかりませんでした。IDを確認してください")
 
+    print(work.work_detail_record, "DETAIL")
+
     return work.work_detail_record
 
 def create(session: Session, data: CreateSchema) -> Work:
     label = get_or_create_publisher_and_label(session, data.publisher_record, data.label, data.label_id)
     work = Work(
         title=data.title,
+        yomigana=data.yomigana,
         label=label
     )
     session.add(work)
@@ -108,6 +111,7 @@ def update(session: Session, key: int, data: UpdateSchema):
 
     # タイトル
     work.title = data.title
+    work.yomigana = data.yomigana
 
     # 著者
     for work_author in work.work_authors:
