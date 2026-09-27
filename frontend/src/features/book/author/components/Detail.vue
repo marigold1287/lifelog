@@ -1,75 +1,42 @@
 <script setup lang="ts">
-    import { onMounted, ref, watch } from "vue"
+    import { ref, watch } from "vue"
+    import type { AuthorInput } from "@/features/book/author/types"
     import { useRoute, useRouter } from "vue-router"
-    import type { AuthorDetail } from "@/types/book"
-    import { knockApi, CustomApiError } from "@/api"
+    import { update, remove, get, getWorks } from "../api"
+    import { CustomApiError, getErrorMessage } from "@/api"
+    import type { WorkView } from "@/features/book/work/types"
     import AuthorForm from "@/features/book/author/components/Form.vue"
-    import BookWorkList from "@/components/BookWorkList.vue"
+    import BookWorkList from "@/features/book/components/BookWorkList.vue"
 
-    const author = ref<AuthorDetail | null>(null)
+    const author = ref<AuthorInput | null>(null)
+    const works = ref<WorkView[]>([])
     const route = useRoute()
     const router = useRouter()
     const errorMessage = ref("")
 
-
-    async function get() {
-        const author = await knockApi<AuthorDetail>(
-            `/api/author/${route.params.id}`
-        );
-
-        if (!author) {
-            throw new Error("著者データがありません");
-        }
-
-        console.log(author)
-
-        return author;
-    }
-
-    async function update() {
+    async function onSubmitUpdate() {
         if (!author.value) return;
 
         try {
-            await knockApi<AuthorDetail>(
-                `/api/author/${route.params.id}`,
-                {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(author.value),
-                },
-            );
+            await update(author.value, `${route.params.id}`);
 
             alert("更新しました")
         } catch (error) {
-            if (error instanceof CustomApiError) {
-                errorMessage.value = error.message;
-            } else {
-                errorMessage.value = "更新に失敗しました"
-            }
+            errorMessage.value = getErrorMessage(error);
         }
     }
 
-    async function confirmDelete() {
+    async function onSubmitDelete() {
         if (!author.value) return;
+        if (!confirm("削除しますか?")) return;
 
-        if (confirm("削除しますか?")) {
-            try {
-                await knockApi<null>(
-                    `/api/author/${route.params.id}`,
-                    {
-                        method: "DELETE",
-                    },
-                );
-                alert("削除しました");
-                
-                await router.push(`/author`);
-            } catch (error) {
-                if (error instanceof CustomApiError) {
-                    errorMessage.value = error.message;
-                }
-            }
+        try {
+            await remove(`${route.params.id}`);
+            alert("削除しました");
+            
+            await router.push(`/author`);
+        } catch (error) {
+            errorMessage.value = getErrorMessage(error);
         }
     }
 
@@ -77,7 +44,8 @@
         () => route.params.id,
         async () => {
             try {
-                author.value = await get();
+                author.value = await get(`${route.params.id}`);
+                works.value = await getWorks(`${route.params.id}`);
             } catch (error) {
                 if (error instanceof CustomApiError) {
                     alert(error.message);
@@ -95,8 +63,8 @@
     <div v-if="author">
         <AuthorForm 
             v-model="author"
-            :name-error="errorMessage"
-            @submit="update"
+            :error-message="errorMessage"
+            @submit="onSubmitUpdate"
         />
         <v-btn
             class="mt-6"
@@ -104,7 +72,7 @@
             prepend-icon="mdi-delete"
             variant="flat"
             type="button"
-            @click="confirmDelete"
+            @click="onSubmitDelete"
         >
         Delete
         </v-btn>
@@ -112,7 +80,7 @@
         <h3>作品リスト</h3>
 
         <BookWorkList
-            :works="author.work_records"
+            :works="works"
         />
 
     </div>

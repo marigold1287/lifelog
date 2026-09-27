@@ -1,5 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-from app.book.work.schemas import WorkSchema
+from pydantic import BaseModel, ConfigDict, field_validator
 from app.db import DomainValidationError, validate_non_empty_string
 import datetime
 
@@ -44,11 +43,6 @@ class ResponseSchema(BaseSchema):
     daily_cost: int
     unit_price: int | None
 
-    model_config = ConfigDict(from_attributes=True)
-
-class ResponseDetailSchema(BaseSchema):
-    daily_cost: int
-    unit_price: int | None
     model_config = ConfigDict(from_attributes=True)
 
 class UpdateSchema(ValidatorMixin, BaseSchema):

@@ -2,28 +2,16 @@
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select
 from .models import Book
-from app.book.work import Work, WorkAuthor
-from app.book.publisher.models import Label, Publisher
-from app.book.author.models import Author
+from app.book.work import Work
 
 
 def get_all(session: Session):
-    books = session.execute(
+    return session.execute(
         select(Book).options(
             selectinload(Book.work)
-                .selectinload(Work.work_authors)
-                .selectinload(WorkAuthor.author)
-                .selectinload(Author.aliases),
+                .selectinload(Work.work_authors),
             selectinload(Book.work)
-                .selectinload(Work.label)
-                .selectinload(Label.publisher)
-                .selectinload(Publisher.aliases),
+                .selectinload(Work.label),
             selectinload(Book.readings),
         )
     ).scalars().all()
-
-    return [
-        record
-        for book in books
-        for record in book.book_list_records
-    ]

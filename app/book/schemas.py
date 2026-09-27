@@ -1,24 +1,34 @@
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, field_validator
+from app.db import validate_non_empty_string, DomainValidationError
 
 class AliasRecord(BaseModel):
     id: int | None = None
     alias: str
 
-class AliasValidatorMixin:
-    @model_validator(mode="before")
+    @field_validator("alias")
     @classmethod
-    def normalize_alias_records(cls, data: dict) -> dict:
-        if not isinstance(data, dict):
-            return data
+    def validate_alias(cls, value: str) -> str:
+        try:
+            return validate_non_empty_string(value, "エイリアス")
+        except DomainValidationError as e:
+            raise ValueError(str(e)) from e
 
-        records = data.get("alias_records")
-        if isinstance(records, list):
-            data["alias_records"] = [
-                {**record, "alias": str(record["alias"]).strip()}
-                for record in records
-                if isinstance(record, dict)
-                and record.get("alias") is not None
-                and str(record["alias"]).strip()
-            ]
+def normalize_records(records, key_name: str):
+    if not isinstance(records, list):
+        return records
 
-        return data
+    return [
+        {**record, key_name: str(record[key_name]).strip()}
+        for record in records
+        if (
+            isinstance(record, dict)
+            and record.get(key_name) is not None
+            and str(record[key_name]).strip()
+        )
+    ]
+
+class AliasValidatorMixin:
+    @field_validator("alias_records", mode="before")
+    @classmethod
+    def normalize_alias_records(cls, value):
+        return normalize_records(value, "alias")

@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import { onMounted, ref } from "vue"
-    import type { Author} from "@/types/book"
-    import { knockApi} from "@/api"
+    import type { AuthorView } from "@/features/book/author/types"
+    import { getList} from "../api"
     import { customFilter } from "@/features/book/author/scripts.ts"
 
     const headers = [
@@ -10,11 +10,11 @@
         { title: 'よみがな', key: 'yomigana' },
     ]
 
-    const authors = ref<Author[]>([])
+    const authors = ref<AuthorView[]>([])
     const search = ref('')
 
     onMounted(async () => {
-        authors.value = await knockApi<Author[]>("/api/author") ?? []
+        authors.value = await getList()
     })
 
 </script>
@@ -50,9 +50,6 @@
                 <RouterLink :to="`/author/${item.id}`">
                     {{ item.id }}
                 </RouterLink>
-            </template>
-            <template #item.alias_records="{ item }">
-                {{ item.alias_records.map(record => record.value).join(", ") }}
             </template>
         </v-data-table>
     </v-card>

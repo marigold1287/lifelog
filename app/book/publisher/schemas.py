@@ -1,14 +1,17 @@
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from app.book.work.schemas import WorkSchema
-from app.db import validate_non_empty_string, DomainValidationError
+from app.book.schemas import AliasRecord, AliasValidatorMixin, normalize_records
+from app.db import validate_non_empty_string, DomainValidationError, normalize_value
+from .models import PublisherAlias, Publisher, Label
+
+class BaseSchema(BaseModel):
+    name: str
+    yomigana: str | None = None
+    alias_records: list["AliasRecord"] = Field(default_factory=list)
+    label_records: list["LabelRecord"] = Field(default_factory=list)
 
 class LabelRecord(BaseModel):
     id: int | None = None
     name: str
-
-class AliasRecord(BaseModel):
-    id: int | None = None
-    alias: str
 
 class ValidatorMixin:
     @field_validator("name")
@@ -19,34 +22,55 @@ class ValidatorMixin:
         except DomainValidationError as e:
             raise ValueError(str(e)) from e
 
+    @field_validator("yomigana")
+    @classmethod
+    def normalize_yomigana(cls, value: str | None) -> str | None:
+        return normalize_value(value)
+    
+    @field_validator("label_records", mode="before")
+    @classmethod
+    def normalize_label_records(cls, value):
+        return normalize_records(value, "name")
 
-class BaseSchema(BaseModel):
-    name: str
-    yomigana: str | None = None
-    alias_records: list[AliasRecord] = Field(default_factory=list)
-    label_records: list[LabelRecord] = Field(default_factory=list)
-
-
-
-class CreateSchema(ValidatorMixin, BaseSchema):
+class CreateSchema(AliasValidatorMixin, ValidatorMixin, BaseSchema):
     pass
 
 class ResponseSchema(BaseSchema):
     id: int
 
-    model_config = ConfigDict(from_attributes=True)
-
-class ResponseDetailSchema(BaseSchema):
-    id: int
-    work_records: list["WorkSchema"]
-
-    model_config = ConfigDict(from_attributes=True)
+class UpdateSchema(AliasValidatorMixin, ValidatorMixin, BaseSchema):
+    name: str
+    yomigana: str | None
+    alias_records: list[AliasRecord]
+    label_records: list[LabelRecord]
 
 
-class UpdateSchema(ValidatorMixin, BaseSchema):
-    name: str | None = None
-    yomigana: str | None = None
-    alias_records: list[AliasRecord] | None = None
-    label_records: list[LabelRecord] | None = None
+def to_alias_schema(alias: PublisherAlias) -> AliasRecord:
+    return AliasRecord(
+        id=alias.id,
+        alias=alias.alias,
+    )
 
-    model_config = ConfigDict(from_attributes=True)
+def to_label_schema(label: Label) -> LabelRecord:
+    return LabelRecord(
+        id=label.id,
+        name=label.name,
+    )
+
+def to_publisher_response_schema(publisher: Publisher) -> ResponseSchema:
+    alias_records = [
+        to_alias_schema(alias)
+        for alias in publisher.aliases
+    ]
+    label_records = [
+        to_label_schema(label)
+        for label in publisher.labels
+    ]
+
+    return ResponseSchema(
+        id=publisher.id,
+        name=publisher.name,
+        yomigana=publisher.yomigana,
+        alias_records=alias_records,
+        label_records=label_records,
+    )

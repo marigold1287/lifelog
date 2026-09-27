@@ -1,7 +1,7 @@
-from app.db import Base
+from app.db import Base, normalize_value
 from typing import List
 from datetime import date
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from sqlalchemy import ForeignKey
 
 from typing import List, TYPE_CHECKING
@@ -32,53 +32,26 @@ class Book(Base):
             return None
         return max(reading.read_date for reading in self.readings)
 
-    @property
-    def read_records(self):
-        return [
-            {
-                "id": read_record.id,
-                "read_date": read_record.read_date,
-            }
-            for read_record in self.readings
-        ]
+    @validates("title")
+    def validate_title(self, key, title):
+        return normalize_value(title)
 
-    @property
-    def book_record(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "volume": self.volume,
-            "isbn": self.isbn,
-            "amazon_asin": self.amazon_asin,
-            "registration_date": self.registration_date,
-            "read_records": self.read_records,
-        }
+    @validates("volume")
+    def validate_volume(self, key, volume):
+        return normalize_value(volume)
+
+    @validates("isbn")
+    def validate_isbn(self, key, isbn: str | None):
+        isbn = normalize_value(isbn)
+        if isbn is None:
+            return None
+
+        return isbn.strip().replace("-", "").replace("ー", "")
+
+    @validates("amazon_asin")
+    def validate_amazon_asin(self, key, amazon_asin: str | None):
+        return normalize_value(amazon_asin)
     
-    @property
-    def book_list_records(self):
-        base = {
-            "work_id": self.work.id,
-            "title": self.work.title,
-            "yomigana": self.work.yomigana,
-            "publisher_id": self.work.publisher.id,
-            "label_id": self.work.label_id,
-            "author_ids": [work_author.author_id for work_author in self.work.work_authors],
-            "publisher_record": self.work.publisher.publisher_record,
-            "label": self.work.label.name,
-            "author_records": self.work.author_records,
-            "subtitle": self.title,
-            "volume": self.volume,
-            "registration_date": self.registration_date,
-        }
-
-        if not self.readings:
-            return [{**base, "read_date": None}]
-
-        return [
-            {**base, "read_date": reading.read_date}
-            for reading in self.readings
-        ]
-
 class BookReading(Base):
     __tablename__ = "book_reading"
 

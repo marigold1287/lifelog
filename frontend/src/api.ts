@@ -13,33 +13,72 @@ export class CustomApiError extends Error {
   }
 }
 
-export async function knockApi<T = any>(url: string, options?: RequestInit): Promise<T | undefined> {
-    const response = await fetch(url, options);
+async function request(
+    url: string,
+    options?: RequestInit,
+): Promise<Response> {
+    const response = await fetch(url, options)
 
-    // 正常系ハンドリング
-    if (response.ok) {
-        if (response.status === 204) {
-            return undefined as T;
+    if (!response.ok) {
+        let errorData: APIErrorResponse
+
+        try {
+            errorData = await response.json()
+        } catch {
+            errorData = {
+                code: "unknown_error",
+                message: `HTTPエラーが発生いたしました (${response.status})`,
+            }
         }
 
-        // ボディが存在する場合のみ JSON パースを行う
-        const text = await response.text();
-        return text ? (JSON.parse(text) as T) : (undefined as T);
+        throw new CustomApiError(errorData)
     }
 
-    // 異常系ハンドリング（エラーレスポンスの JSON パース）
-    let errorData: APIErrorResponse;
-    try {
-        errorData = await response.json();
-    } catch {
-        errorData = {
-            code: "unknown_error",
-            message: `HTTPエラーが発生いたしました (${response.status})`,
-        };
+    return response
+}
+
+export async function knockApi<T>(
+    url: string,
+    options?: RequestInit,
+): Promise<T> {
+    const response = await request(url, options)
+
+    return response.json() as Promise<T>
+}
+
+export async function knockApiNoContent(
+    url: string,
+    options?: RequestInit,
+): Promise<void> {
+    await request(url, options)
+}
+
+export function formatDate(date: Date): string {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+
+    return `${year}-${month}-${day}`
+}
+
+export function parseDate(value: string): Date {
+    const [year, month, day] = value.split("-").map(Number)
+
+    if (typeof year !== "number" || typeof month !== "number" || typeof day !== "number") {
+        throw Error("無効なフォーマットです。YYYY-MM-DDで入力してください")
     }
 
-    throw new CustomApiError(
-        errorData
-    );
+    return new Date(year, month - 1, day)
+}
 
+export function getErrorMessage(error: unknown): string {
+    if (error instanceof CustomApiError) {
+        return error.message
+    }
+
+    if (error instanceof Error) {
+        return error.message
+    }
+
+    return "予期しないエラーが発生いたしました"
 }

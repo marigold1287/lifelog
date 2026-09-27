@@ -1,4 +1,4 @@
-from app.db import Base, validate_non_empty_string
+from app.db import Base, validate_non_empty_string, normalize_value
 from typing import List, TYPE_CHECKING
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
@@ -25,40 +25,13 @@ class Publisher(Base):
     def works(self):
         return [work for label in self.labels for work in label.works]
 
-    @property
-    def work_records(self):
-        return [
-            work.work_record
-            for work in self.works
-        ]
-
     @validates("name")
     def validate_name(self, key, name):
         return validate_non_empty_string(name, "出版社名")
 
-    @property
-    def publisher_record(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "yomigana": self.yomigana,
-            "alias_records": self.alias_records,
-            "label_records": self.label_records,
-        }
-
-    @property
-    def label_records(self) -> list[dict]:
-        return [
-            label.label_record
-            for label in self.labels
-        ]
-
-    @property
-    def alias_records(self) -> list[dict]:
-        return [
-            alias.alias_record
-            for alias in self.aliases
-        ]
+    @validates("yomigana")
+    def validate_yomigana(self, key, yomigana):
+        return normalize_value(yomigana)
 
 class Label(Base):
     __tablename__ = "label"
@@ -77,14 +50,6 @@ class Label(Base):
     def validate_alias(self, key, alias):
         return validate_non_empty_string(alias, "レーベル名")
 
-    @property
-    def label_record(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-        }
-
-    
 class PublisherAlias(Base):
     __tablename__ = "publisher_alias"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -96,10 +61,3 @@ class PublisherAlias(Base):
     @validates("alias")
     def validate_alias(self, key, alias):
         return validate_non_empty_string(alias, "エイリアス")
-
-    @property
-    def alias_record(self):
-        return {
-            "id": self.id,
-            "alias": self.alias,
-        }

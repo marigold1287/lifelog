@@ -1,10 +1,10 @@
 <script setup lang="ts">
     import { ref } from "vue"
     import { validateStringEntered } from "@/validator"
-    import type { Publisher } from "@/types/book"
+    import type { PublisherInput } from "../types"
     import RecordListEditor from "@/components/RecordListEditor.vue"
 
-    const publisher = defineModel<Publisher>({ required: true })
+    const publisher = defineModel<PublisherInput>({ required: true })
 
     const props = withDefaults(defineProps<{
         submitButtonLabel?: string
@@ -44,7 +44,6 @@
         <h2>よみがな</h2>
         <v-text-field
             v-model="publisher.yomigana"
-            :rules="[validateStringEntered]"
             label="よみがな"
         />
         <h3>Aliases</h3>

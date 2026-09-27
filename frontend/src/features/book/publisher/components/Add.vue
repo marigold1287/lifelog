@@ -1,44 +1,32 @@
 <script setup lang="ts">
     import { ref } from "vue"
-    import type { Publisher } from "@/types/book"
-    import { knockApi, CustomApiError } from "@/api"
-    import PublisherForm from "@/features/book/publisher/components/Form.vue"
+    import type { PublisherInput } from "../types"
+    import { getErrorMessage } from "@/api"
+    import { create } from "../api"
+    import PublisherForm from "./Form.vue"
     import { useRouter } from "vue-router"
 
     const errorMessage = ref("")
     const router = useRouter()
 
-    const publisher = ref<Publisher>({
-        id: null,
+    const publisher = ref<PublisherInput>({
         name: "",
         yomigana: "",
         alias_records: [{id: null, alias: ""}],
         label_records: [{id: null, name: "レーベルなし"}]
     })
 
-    async function insertPublisher() {
+    async function submit() {
         try {
-            const record = await knockApi<Publisher>(
-                "/api/publisher",
-                {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(publisher.value),
-                },
-            );
+            const record = await create(publisher.value)
+            console.log(record)
 
-            if (record && record.id) {
-                alert("登録が完了いたしました！");
-                await router.push(`/publisher/${record.id}`);
+            if (record?.id) {
+                alert("登録が完了いたしました！")
+                await router.push(`/publisher/${record.id}`)
             }
         } catch (error) {
-            if (error instanceof CustomApiError) {
-                errorMessage.value = error.message;
-            } else if (error instanceof Error) {
-                errorMessage.value = error.message;
-            }
+            errorMessage.value = getErrorMessage(error)
         }
     }
 </script>
@@ -46,7 +34,7 @@
 <template>
     <PublisherForm 
         v-model="publisher"
-        @submit="insertPublisher"
+        @submit="submit"
         :name-error="errorMessage"
     />
 

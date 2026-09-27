@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select
 from app.db import safe_commit, sync_records, NotFoundError
+from app.book.work.models import WorkAuthor, Work
 from .schemas import UpdateSchema, CreateSchema
 from .models import Author, AuthorAlias
 
@@ -15,7 +16,6 @@ def get(session: Session, key: int) -> Author:
     author = session.execute(
         select(Author)
         .options(selectinload(Author.aliases))
-        .options(selectinload(Author.works))
         .where(Author.id == key)
     ).scalars().first()
 
@@ -23,6 +23,15 @@ def get(session: Session, key: int) -> Author:
         raise NotFoundError("データが見つかりませんでした。IDを確認してください")
 
     return author
+
+def get_works(session: Session, key: int) -> list[Work]:
+    return list(
+        session.execute(
+            select(Work)
+            .join(WorkAuthor, WorkAuthor.work_id == Work.id)
+            .where(WorkAuthor.author_id == key)
+        ).scalars()
+    )
 
 def create(session: Session, data: CreateSchema) -> Author:
     new_author = Author(
@@ -34,12 +43,11 @@ def create(session: Session, data: CreateSchema) -> Author:
     session.add(new_author)
 
     for alias_record in data.alias_records:
-        if alias_record.alias and alias_record.alias.strip():
-            new_alias = AuthorAlias(
-                author=new_author,
-                alias=alias_record.alias.strip()
-            )
-            session.add(new_alias)
+        new_alias = AuthorAlias(
+            author=new_author,
+            alias=alias_record.alias
+        )
+        session.add(new_alias)
 
     safe_commit(session)
     session.refresh(new_author)

@@ -1,4 +1,4 @@
-from app.db import Base, validate_non_empty_string
+from app.db import Base, validate_non_empty_string, normalize_value
 from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 from sqlalchemy import ForeignKey
@@ -19,39 +19,22 @@ class Author(Base):
         cascade="all, delete-orphan",
     )
 
-    works: Mapped[List["WorkAuthor"]] = relationship(
+    work_authors: Mapped[List["WorkAuthor"]] = relationship(
         back_populates="author",
         cascade="all, delete-orphan",
     )
 
     @validates("name")
-    def validate_name(self, key, name):
-        return validate_non_empty_string(name, "著者名")
+    def validate_name(self, key, value):
+        return validate_non_empty_string(value, "著者名")
 
-    @property
-    def work_records(self):
-        return [
-            work_author.work.work_record
-            for work_author in self.works
-        ]
-    
-    @property
-    def alias_records(self) -> list[dict]:
-        return [
-            alias.alias_record
-            for alias in self.aliases
-        ]
+    @validates("yomigana")
+    def validate_yomigana(self, key, value):
+        return normalize_value(value)
 
-    @property
-    def author_record(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "yomigana": self.yomigana,
-            "note": self.note,
-            "alias_records": self.alias_records,
-        }
-
+    @validates("note")
+    def validate_note(self, key, value):
+        return normalize_value(value)
 
 class AuthorAlias(Base):
     __tablename__ = "author_alias"
@@ -64,10 +47,3 @@ class AuthorAlias(Base):
     @validates("alias")
     def validate_alias(self, key, alias):
         return validate_non_empty_string(alias, "エイリアス")
-
-    @property
-    def alias_record(self):
-        return {
-            "id": self.id,
-            "alias": self.alias,
-        }

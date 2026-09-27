@@ -1,19 +1,20 @@
 <script setup lang="ts">
     import { onMounted, ref } from "vue"
-    import type { Author, AuthorEditRecord } from "@/types/book"
+    import type { AuthorInput } from "../types"
+    import type { AuthorView } from "@/features/book/author/types"
     import { knockApi, CustomApiError } from "@/api"
     import { customFilter as customAuthorFilter } from "@/features/book/author/scripts.ts"
     import { validateStringEntered } from "@/validator"
 
-    const authors = ref<Author[]>([])
+    const authors = ref<AuthorView[]>([])
 
-    const items = defineModel<AuthorEditRecord[]>({ required: true })
+    const items = defineModel<AuthorInput[]>({ required: true })
 
     if (items.value.length === 0) {
         addItem()
     }
 
-    function onAuthorChanged(item: AuthorEditRecord, author: Author | string) {
+    function onAuthorChanged(item: AuthorInput, author: AuthorView | string) {
         if (typeof author === "string") {
             author = authors.value.find(a => a.name == author) ?? author
         }
@@ -32,7 +33,7 @@
     function addItem() {
         items.value.push({
             id: null,
-            name: null,
+            name: "",
             role: null
         })
     }
@@ -43,7 +44,8 @@
 
     onMounted(async () => {
         try {
-            authors.value = await knockApi<Author[]>("/api/author") ?? [];
+            authors.value = await knockApi<AuthorView[]>("/api/author") ?? [];
+            console.log(items.value)
         } catch (error) {
             if (error instanceof CustomApiError) {
                 alert(error.message);

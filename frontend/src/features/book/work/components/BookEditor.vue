@@ -1,7 +1,8 @@
 <script setup lang="ts">
-    import type { BookEditRecord } from "@/types/book"
+    import type { BookInput } from "@/features/book/book/types"
+    import { knockApi, CustomApiError } from "@/api"
 
-    const books = defineModel<BookEditRecord[]>({ required: true })
+    const books = defineModel<BookInput[]>({ required: true })
 
     function addItem() {
         books.value.push({
@@ -10,8 +11,8 @@
             volume: null,
             isbn: null,
             amazon_asin: null,
-            registration_date: new Date().toLocaleDateString("sv-SE"),
-            read_records: [],
+            registration_date: new Date(),
+            read_dates: [],
         })
     }
 
@@ -23,26 +24,33 @@
         books.value.splice(index, 1)
     }
 
-    function addReadRecord(item: BookEditRecord) {
-        item.read_records.push({
+    function addReadRecord(item: BookInput) {
+        item.read_dates.push({
             id: null,
-            read_date: new Date().toLocaleDateString("sv-SE"),
+            read_date: new Date(),
         })
     }
 
-    function removeReadRecord(item: BookEditRecord, index: number) {
-        item.read_records.splice(index, 1)
+    function removeReadRecord(item: BookInput, index: number) {
+        item.read_dates.splice(index, 1)
     }
 
     const openNdl = async (isbn: string) => {
-        const response = await fetch(
-            `/api/ndl/${isbn}`
-        )
+        try {
+            const normalizedIsbn = isbn.replace(/[-\s]/g, "")
+            const data = await knockApi(
+                `/api/ndl/${normalizedIsbn}`
+            )
 
-        const json = await response.json()
-
-        if (json) {
-            window.open(json.link, "_blank")
+            if (data) {
+                window.open(data.link, "_blank")
+            }
+        } catch(error) {
+            if (error instanceof CustomApiError) {
+                alert(error.message)
+            } else {
+                alert("リンクの取得に失敗しました")
+            }
         }
     }
 
@@ -128,7 +136,7 @@
     <!-- 読了記録 -->
     <div class="ml-8 mt-1">
         <div
-            v-for="(read, readIndex) in item.read_records"
+            v-for="(read, readIndex) in item.read_dates"
             :key="read.id ?? readIndex"
             class="d-flex align-center"
         >

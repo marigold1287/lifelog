@@ -1,55 +1,18 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-from datetime import date
-from app.db import validate_non_empty_string, DomainValidationError
-
-class AliasRecord(BaseModel):
-    id: int | None = None
-    alias: str
-
-class LabelRecord(BaseModel):
-    id: int | None = None
-    name: str
+from pydantic import BaseModel, ConfigDict,  field_validator
+from app.db import validate_non_empty_string, DomainValidationError, normalize_value
+from app.book.schemas import normalize_records
+from .models import Work
+from app.book.book.schemas import (
+    to_input_schema as to_book_input_schema,
+    BookInputSchema,
+)
 
 class AuthorSchema(BaseModel):
-    id: int | None = None
-    name: str | None = None
-    role: str | None = None
-    yomigana: str | None = None
-    alias_records: list[AliasRecord] = []
-
-
-class PublisherSchema(BaseModel):
-    id: int | None = None
+    id: int | None
     name: str
-    yomigana: str | None = None
-    alias_records: list[AliasRecord] = []
-    # label_records: list[LabelRecord] = []
+    role: str | None
 
-class BookEditSchema(BaseModel):
-    id: int | None
-    title: str | None
-    volume: str | None
-    isbn: str | None
-    amazon_asin: str | None
-    registration_date: date
-    read_records: list["ReadDateEditSchema"]
-
-class ReadDateEditSchema(BaseModel):
-    id: int | None
-    read_date: date | None
-
-
-class WorkSchema(BaseModel):
-    id: int
-    title: str
-    yomigana: str | None
-    publisher_record: PublisherSchema
-    label: str
-    label_id: int | None
-    author_records: list[AuthorSchema]
-
-    model_config = ConfigDict(from_attributes=True)
-
+class ValidatorMixin:
     @field_validator("title")
     @classmethod
     def validate_title(cls, value: str) -> str:
@@ -58,12 +21,16 @@ class WorkSchema(BaseModel):
         except DomainValidationError as e:
             raise ValueError(str(e)) from e
 
-    @field_validator("publisher_record")
+    @field_validator("yomigana")
     @classmethod
-    def validate_publisher_name(cls, value: PublisherSchema) -> PublisherSchema:
+    def validate_yomigana(cls, value: str | None) -> str | None:
+        return normalize_value(value)
+
+    @field_validator("publisher")
+    @classmethod
+    def validate_publisher(cls, value: str) -> str:
         try:
-            value.name = validate_non_empty_string(value.name, "出版社名")
-            return value
+            return validate_non_empty_string(value, "出版社名")
         except DomainValidationError as e:
             raise ValueError(str(e)) from e
 
@@ -75,16 +42,65 @@ class WorkSchema(BaseModel):
         except DomainValidationError as e:
             raise ValueError(str(e)) from e
 
+    @field_validator("author_records", mode="before")
+    @classmethod
+    def normalize_author_records(cls, value):
+        return normalize_records(value, "name")
 
-class ResponseSchema(WorkSchema):
+class InputResponseSchema(BaseModel):
+    title: str
+    yomigana: str | None
+    publisher: str
+    publisher_id: int | None
+    label: str
+    label_id: int | None
+    author_records: list[AuthorSchema]
+    book_records: list[BookInputSchema]
+
+
+class InputSchema(ValidatorMixin, InputResponseSchema):
     pass
 
-class ResponseDetailSchema(WorkSchema):
-    book_records: list[BookEditSchema]
+class ResponseSchema(BaseModel):
+    id: int
+    title: str
+    yomigana: str | None
+    publisher_id: int
+    label_id: int
+    author_ids: list[int]
 
-class UpdateSchema(ResponseDetailSchema):
-    pass
+def to_response_schema(work: Work) -> ResponseSchema:
+    return ResponseSchema(
+        id=work.id,
+        title=work.title,
+        yomigana=work.yomigana,
+        publisher_id=work.label.publisher_id,
+        label_id=work.label_id,
+        author_ids=[author.author_id for author in work.work_authors],
+    )
 
-class CreateSchema(ResponseDetailSchema):
-    id: None
-    pass
+
+def to_input_schema(work: Work) -> InputResponseSchema:
+    author_records = [
+        AuthorSchema(
+            id=work_author.author_id,
+            name=work_author.author.name,
+            role=work_author.role,
+        )
+        for work_author in work.work_authors
+    ]
+    book_records = [
+        to_book_input_schema(book)
+        for book in work.books
+    ]
+
+    return InputResponseSchema(
+        title=work.title,
+        yomigana=work.yomigana,
+        publisher=work.publisher.name,
+        publisher_id=work.label.publisher_id,
+        label=work.label.name,
+        label_id=work.label_id,
+        author_records=author_records,
+        book_records=book_records,
+    )

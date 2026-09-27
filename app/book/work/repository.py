@@ -2,32 +2,29 @@
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select
 from app.db import safe_commit, sync_records, NotFoundError
-from .schemas import UpdateSchema, CreateSchema, BookEditSchema, AuthorSchema, PublisherSchema
+from .schemas import AuthorSchema, InputSchema
 from .models import Work, WorkAuthor
 from app.book.book.models import Book, BookReading
+from app.book.book.schemas import BookInputSchema
 from app.book.publisher.models import Label, Publisher
 from app.book.author.models import Author
 
 
-def get_all(session: Session) -> list[dict]:
-    works = session.execute(
+def get_all(session: Session) -> list[Work]:
+    return session.execute(
         select(Work).options(
             selectinload(Work.work_authors)
-                .selectinload(WorkAuthor.author)
-                .selectinload(Author.aliases),
+                .selectinload(WorkAuthor.author),
             selectinload(Work.label)
                 .selectinload(Label.publisher)
-                .selectinload(Publisher.aliases)
         )
     ).scalars().all()
 
-    return [work.work_record for work in works]
-
-def get(session: Session, key: int) -> dict:
+def get(session: Session, key: int) -> Work:
     work = session.execute(
         select(Work)
-        .options(selectinload(Work.work_authors).selectinload(WorkAuthor.author).selectinload(Author.aliases))
-        .options(selectinload(Work.label).selectinload(Label.publisher).selectinload(Publisher.aliases))
+        .options(selectinload(Work.work_authors).selectinload(WorkAuthor.author))
+        .options(selectinload(Work.label).selectinload(Label.publisher))
         .options(selectinload(Work.books).selectinload(Book.readings))
         .where(Work.id == key)
     ).scalars().first()
@@ -35,10 +32,16 @@ def get(session: Session, key: int) -> dict:
     if work is None:
         raise NotFoundError("データが見つかりませんでした。IDを確認してください")
 
-    return work.work_detail_record
+    return work
 
-def create(session: Session, data: CreateSchema) -> Work:
-    label = get_or_create_publisher_and_label(session, data.publisher_record, data.label, data.label_id)
+def create(session: Session, data: InputSchema) -> Work:
+    label = get_or_create_publisher_and_label(
+        session, 
+        data.publisher, 
+        data.publisher_id,
+        data.label, 
+        data.label_id
+    )
     work = Work(
         title=data.title,
         yomigana=data.yomigana,
@@ -65,15 +68,15 @@ def create(session: Session, data: CreateSchema) -> Work:
             registration_date=record.registration_date,
         )
         work.books.append(new_book)
-        for read_record in record.read_records:
+        for read_date in record.read_dates:
             new_book.readings.append(
-                BookReading(read_date=read_record.read_date)
+                BookReading(read_date=read_date.read_date)
             )
 
     safe_commit(session)
     session.refresh(work)
 
-    return work.work_detail_record
+    return work
 
 def get_or_create_author(session: Session, record: AuthorSchema):
     if record.id is None:
@@ -83,17 +86,23 @@ def get_or_create_author(session: Session, record: AuthorSchema):
 
     return session.get(Author, record.id)
 
-def get_or_create_publisher_and_label(session: Session, publisher_record: PublisherSchema, label_name: str, label_id: int | None):
-    if publisher_record.id is None:
-        publisher = Publisher(name=publisher_record.name)
+def get_or_create_publisher_and_label(
+        session: Session, 
+        publisher: str, 
+        publisher_id: int | None,
+        label_name: str, 
+        label_id: int | None
+    ):
+    if publisher_id is None:
+        publisher = Publisher(name=publisher)
         session.add(publisher)
         label = Label(
-            name=label_name,
+            name=label,
             publisher=publisher
         )
         session.add(label)
     else:
-        publisher = session.get(Publisher, publisher_record.id)
+        publisher = session.get(Publisher, publisher_id)
         if label_id is None:
             label = Label(
                 name=label_name,
@@ -104,7 +113,7 @@ def get_or_create_publisher_and_label(session: Session, publisher_record: Publis
             label = session.get(Label, label_id)
     return label
 
-def update(session: Session, key: int, data: UpdateSchema):
+def update(session: Session, key: int, data: InputSchema):
     work = session.get(Work, key)
 
     # タイトル
@@ -126,11 +135,11 @@ def update(session: Session, key: int, data: UpdateSchema):
         session.add(record)
 
     # 出版社
-    label = get_or_create_publisher_and_label(session, data.publisher_record, data.label, data.label_id)
+    label = get_or_create_publisher_and_label(session, data.publisher, data.publisher_id, data.label, data.label_id)
     work.label = label
 
     # 書籍
-    def update_book(current: Book, update: BookEditSchema):
+    def update_book(current: Book, update: BookInputSchema):
         current.title = update.title
         current.volume = update.volume
         current.isbn = update.isbn
@@ -140,13 +149,13 @@ def update(session: Session, key: int, data: UpdateSchema):
         sync_records(
             session,
             current.readings,
-            update.read_records,
+            update.read_dates,
             update=lambda read_date, record: setattr(read_date, "read_date", record.read_date),
             create=lambda record: current.readings.append(
                 BookReading(read_date=record.read_date)
             ),
         )
-    def create_book(record: BookEditSchema):
+    def create_book(record: BookInputSchema):
         new_book = Book(
             title=record.title,
             volume=record.volume,
@@ -155,9 +164,9 @@ def update(session: Session, key: int, data: UpdateSchema):
             registration_date=record.registration_date,
         )
         work.books.append(new_book)
-        for read_record in record.read_records:
+        for read_date in record.read_dates:
             new_book.readings.append(
-                BookReading(read_date=read_record.read_date)
+                BookReading(read_date=read_date.read_date)
             )
 
     sync_records(
@@ -170,7 +179,7 @@ def update(session: Session, key: int, data: UpdateSchema):
 
     safe_commit(session)
 
-    return work.work_detail_record
+    return work
 
 
 def delete(session: Session, key: int) -> None:

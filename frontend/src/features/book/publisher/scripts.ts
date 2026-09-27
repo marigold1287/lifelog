@@ -1,4 +1,18 @@
-import type { Publisher } from "@/types/book"
+import type { PublisherView } from "./types"
+
+export function generateSearchText(publisher: PublisherView) {
+    return [
+        publisher.name,
+        publisher.yomigana,
+        ...publisher.alias_records.map(record => record.alias),
+    ]
+    .filter(value => value != null)
+    .join(" ")
+}
+
+export function generatePublisherMap(publishers: PublisherView[]) {
+    return new Map(publishers.map(publisher => [publisher.id, publisher]))
+}
 
 export const customFilter = (
     value: unknown,
@@ -7,16 +21,9 @@ export const customFilter = (
 ) => {
     if (!item) return false
 
-    const publisher = item.raw as Publisher
+    const publisher = item.raw as PublisherView
 
-    const text = [
-        publisher.id,
-        publisher.name,
-        publisher.yomigana,
-        ...publisher.alias_records.map(record => record.alias),
-    ]
-    .filter(value => value != null)
-    .join(" ")
+    const text = generateSearchText(publisher)
 
     return text.toLowerCase().includes(query.toLowerCase())
 }

@@ -1,15 +1,15 @@
 <script setup lang="ts">
     import { ref } from "vue"
-    import type { Author } from "@/types/book"
-    import { knockApi, CustomApiError } from "@/api"
+    import type { AuthorInput } from "@/features/book/author/types"
+    import { getErrorMessage } from "@/api"
+    import { create } from "../api"
     import Form from "@/features/book/author/components/Form.vue"
     import { useRouter } from "vue-router"
 
     const errorMessage = ref("")
     const router = useRouter()
 
-    const author = ref<Author>({
-        id: null,
+    const author = ref<AuthorInput>({
         name: "",
         yomigana: "",
         alias_records: [{id: null, alias: ""}],
@@ -18,27 +18,14 @@
 
     async function insert() {
         try {
-            const record = await knockApi<Author>(
-                "/api/author",
-                {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(author.value),
-                },
-            );
+            const record = await create(author.value);
 
             if (record && record.id) {
                 alert("登録が完了いたしました！");
                 await router.push(`/author/${record.id}`);
             }
         } catch (error) {
-            if (error instanceof CustomApiError) {
-                errorMessage.value = error.message;
-            } else if (error instanceof Error) {
-                errorMessage.value = error.message;
-            }
+            errorMessage.value = getErrorMessage(error);
         }
     }
 </script>
@@ -47,7 +34,7 @@
     <Form 
         v-model="author"
         @submit="insert"
-        :name-error="errorMessage"
+        :error-message="errorMessage"
     />
 
 </template>

@@ -104,3 +104,10 @@ def validate_non_empty_string(value: str, field_name: str = "名前") -> str:
     if not value or not value.strip():
         raise DomainValidationError(f"空文字列や空白のみの{field_name}は登録できません")
     return value.strip()
+
+def normalize_value(value: str | None) -> str | None:
+    if value is None:
+        return None
+
+    value = value.strip()
+    return value or None

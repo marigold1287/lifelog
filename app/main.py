@@ -62,7 +62,6 @@ async def database_validation_error_handler(request: Request, exc: DomainValidat
 
 @app.exception_handler(ValidationError)
 async def database_validation_error_handler(request: Request, exc: ValidationError):
-    print(exc)
     return JSONResponse(
         status_code=400,
         content={
@@ -109,7 +108,6 @@ async def validation_exception_handler(
     exc: RequestValidationError,
 ):
     error = exc.errors()[0]
-    print(exc)
 
     return JSONResponse(
         status_code=422,

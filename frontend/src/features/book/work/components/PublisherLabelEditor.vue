@@ -1,38 +1,39 @@
 <script setup lang="ts">
 
     import { onMounted, ref, computed, watch } from "vue"
-    import type { Publisher, PublisherEdit, LabelRecord } from "@/types/book"
     import { knockApi, CustomApiError } from "@/api"
+    import type { PublisherView, LabelRecord } from "@/features/book/publisher/types"
     import { customFilter as customPublisherFilter } from "@/features/book/publisher/scripts.ts"
     import { validateStringEntered } from "@/validator"
 
-    const publisherRecord = defineModel<PublisherEdit>("publisher", { required: true }); 
-    const labelId = defineModel<number | null>("labelId", { required: true }); 
+    const publisher = defineModel<string>("publisher", { required: true }); 
+    const publisherId = defineModel<number | null>("publisherId", { required: true }); 
     const label = defineModel<string>("label", { required: true }); 
+    const labelId = defineModel<number | null>("labelId", { required: true }); 
 
-    const publishers = ref<Publisher[]>([])
+    const publishers = ref<PublisherView[]>([])
 
     const labels = computed(() => {
         const publisher = publishers.value.find(
-            p => p.id === publisherRecord.value.id
+            p => p.id === publisherId.value
         )
 
         return publisher?.label_records ?? [{id: null, name: "レーベルなし"}]
     })
 
-    function onPublisherChanged(value: Publisher | string | null) {
+    function onPublisherChanged(value: PublisherView | string | null) {
         if (typeof value === "string") {
             value = publishers.value.find(p => p.name == value) ?? value
         }
         if (typeof value === "string") {
-            publisherRecord.value.name = value
-            publisherRecord.value.id = null
+            publisher.value = value
+            publisherId.value = null
         } else if (value === null) {
-            publisherRecord.value.name = ""
-            publisherRecord.value.id = null
+            publisher.value = ""
+            publisherId.value = null
         } else {
-            publisherRecord.value.name = value.name
-            publisherRecord.value.id = value.id
+            publisher.value = value.name
+            publisherId.value = value.id
         }
     }
 
@@ -53,7 +54,7 @@
     }
 
     watch(
-        () => publisherRecord.value.name,
+        () => publisher.value,
         (newPublisher, oldPublisher) => {
             if (oldPublisher === undefined) return
 
@@ -66,7 +67,7 @@
 
     onMounted(async () => {
         try {
-            publishers.value = await knockApi<Publisher[]>("/api/publisher") ?? [];
+            publishers.value = await knockApi<PublisherView[]>("/api/publisher") ?? [];
         } catch (error) {
             if (error instanceof CustomApiError) {
                 alert(error.message);
@@ -83,17 +84,17 @@
         class="d-flex align-center mb-2"
     >
         <v-btn
-            v-if="publisherRecord.id"
+            v-if="publisherId"
             icon="mdi-open-in-new"
             variant="text"
             size="small"
-            :href="`/publisher/${publisherRecord.id}`"
+            :href="`/publisher/${publisherId}`"
             target="_blank"
             rel="noopener noreferrer"
         />
         <v-combobox
             label="出版社"
-            v-model="publisherRecord.name"
+            v-model="publisher"
             :items="publishers"
             item-title="name"
             item-value="name"

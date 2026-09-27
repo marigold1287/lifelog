@@ -14,6 +14,8 @@
         <v-list-item to="/publisher" title="Pubilsher" />
         <v-list-item to="/author" title="Author" />
         <v-list-item to="/bill/electric" title="Electric Bill" />
+        <v-list-item to="/bill/gas" title="Gas Bill" />
+        <v-list-item to="/bill/water" title="Water Bill" />
       </v-list>
     </v-navigation-drawer>
 

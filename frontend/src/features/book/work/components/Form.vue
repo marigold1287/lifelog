@@ -1,12 +1,12 @@
 <script setup lang="ts">
     import {ref} from "vue"
-    import type { WorkEditRecord } from "@/types/book"
+    import type { WorkInput } from "../types"
     import { validateStringEntered } from "@/validator"
     import AuthorEditor from "@/features/book/work/components/AuthorEditor.vue"
     import BookEditor from "@/features/book/work/components/BookEditor.vue"
     import PublisherLabelEditor from "@/features/book/work/components/PublisherLabelEditor.vue"
 
-    const work = defineModel<WorkEditRecord>({ required: true })
+    const work = defineModel<WorkInput>({ required: true })
     const props = withDefaults(defineProps<{
         errorMessage?: string
     }>(), {
@@ -23,6 +23,8 @@
         if (!valid) {
             return
         }
+
+        console.log(work)
 
         emit("submit")
     }
@@ -51,7 +53,8 @@
 
         <h2>出版社/レーベル</h2>
         <PublisherLabelEditor 
-            v-model:publisher="work.publisher_record" 
+            v-model:publisher="work.publisher" 
+            v-model:publisher-id="work.publisher_id" 
             v-model:label="work.label" 
             v-model:label-id="work.label_id" 
         />

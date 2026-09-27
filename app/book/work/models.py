@@ -1,8 +1,7 @@
-from app.db import Base, validate_non_empty_string
+from app.db import Base, validate_non_empty_string, normalize_value
 from typing import List
-from datetime import date
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
-from sqlalchemy import ForeignKey, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import ForeignKey, PrimaryKeyConstraint
 
 from typing import List, TYPE_CHECKING
 
@@ -35,51 +34,13 @@ class Work(Base):
     def publisher(self):
         return self.label.publisher
 
-    @property
-    def authors(self):
-        return ", ".join([work_author.author.name for work_author in self.work_authors])
+    @validates("title")
+    def validate_title(self, key, name):
+        return validate_non_empty_string(name, "タイトル")
 
-    @property
-    def book_records(self):
-        return [
-            book.book_record
-            for book in sorted(self.books, key=volume_sort_key)
-        ]
-
-    @property
-    def work_record(self):
-        return {
-            "id": self.id,
-            "publisher_record": self.publisher.publisher_record,
-            "yomigana": self.yomigana,
-            # "publisher": self.label.publisher.name,
-            # "publisher_aliases": [alias.alias for alias in self.publisher.aliases],
-            # "publisher_yomigana": self.publisher.yomigana,
-            # "publisher_id": self.label.publisher_id,
-            "authors": self.authors,
-            "label_id": self.label_id,
-            "label": self.label.name,
-            "title": self.title,
-            "author_records": self.author_records,
-        }
-
-    @property
-    def work_detail_record(self):
-        return {
-            "book_records": self.book_records,
-            **self.work_record,
-        }
-    
-
-    @property
-    def author_records(self):
-        return [
-            {
-                **work_author.author.author_record,
-                "role": work_author.role,
-            }
-            for work_author in self.work_authors
-        ]
+    @validates("yomigana")
+    def validate_yomigana(self, key, yomigana):
+        return normalize_value(yomigana)
 
 class WorkAuthor(Base):
     __tablename__ = "work_author"
@@ -92,4 +53,4 @@ class WorkAuthor(Base):
     )
 
     work: Mapped["Work"] = relationship(back_populates="work_authors")
-    author: Mapped["Author"] = relationship(back_populates="works")
+    author: Mapped["Author"] = relationship(back_populates="work_authors")

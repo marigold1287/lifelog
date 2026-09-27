@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue"
-import type { Publisher} from "@/types/book"
-import { knockApi} from "@/api"
-import { customFilter } from "@/features/book/publisher/scripts.ts"
+import type { PublisherView } from "../types"
+import { customFilter } from "../scripts.ts"
+import { getList } from "../api"
 
 const headers = [
   { title: 'ID', key: 'id' },
@@ -10,11 +10,11 @@ const headers = [
   { title: 'よみがな', key: 'yomigana' },
 ]
 
-const publishers = ref<Publisher[]>([])
+const publishers = ref<PublisherView[]>([])
 const search = ref('')
 
 onMounted(async () => {
-  publishers.value = await knockApi<Publisher[]>("/api/publisher") ?? []
+    publishers.value = await getList()
 })
 
 </script>

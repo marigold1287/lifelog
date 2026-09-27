@@ -2,7 +2,7 @@ import pandas as pd
 from .models import ElectricBill as Bill
 from pathlib import Path
 from app.db import SessionLocal, safe_commit
-
+import math
 
 PWD = Path(__file__).parent
 
@@ -10,7 +10,7 @@ df = pd.read_csv(PWD / "resources" / "electric_bill.csv")
 
 with SessionLocal() as session:
     for _, row in df.iterrows():
-        total = (
+        total = math.floor(
             row["basic_rate"]
         + row["tier_one_rate"]
         + row["tier_two_rate"]

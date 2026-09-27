@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue"
-import type { WorkRecord } from "@/types/book"
-import { knockApi} from "@/api"
-import BookWorkList from "@/components/BookWorkList.vue"
+    import { onMounted, ref } from "vue"
+    import type { WorkView } from "@/features/book/work/types"
+    import { knockApi} from "@/api"
+    import BookWorkList from "@/features/book/components/BookWorkList.vue"
 
-    const works = ref<WorkRecord[]>([])
-
-    async function fetchWorks() {
-        const data = await knockApi("/api/work")
-        return data;
-    }
+    const works = ref<WorkView[]>([])
 
     onMounted(async () => {
-    works.value = await fetchWorks()
+        works.value = await knockApi<WorkView[]>("/api/work")
     })
 
 </script>

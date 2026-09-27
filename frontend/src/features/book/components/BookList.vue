@@ -1,19 +1,23 @@
 <script setup lang="ts">
     import { ref, computed, onMounted } from "vue"
     import { knockApi } from "@/api";
-    import type { Book, Publisher, Author } from "@/types/book"
+    import type { PublisherView } from "@/features/book/publisher/types"
+    import type { BookView } from "@/features/book/book/types";
+    import type { AuthorView } from "@/features/book/author/types";
+    import { generateAuthorMap, generateSearchText as generateAuthorSearchText } from "@/features/book/author/scripts";
+    import { generatePublisherMap, generateSearchText as generatePublisherSearchText } from "@/features/book/publisher/scripts";
 
     const props = defineProps<{
-        books: Book[]
+        books: BookView[]
     }>()
 
-    const authors = ref<Author[]>([])
-    const publishers = ref<Publisher[]>([])
+    const authors = ref<AuthorView[]>([])
+    const publishers = ref<PublisherView[]>([])
 
     const headers = [
         { title: 'Title', key: 'title' },
         { title: 'Authors', key: 'author_records' },
-        { title: 'Publisher', key: 'publisher_record' },
+        { title: 'Publisher', key: 'publisher' },
         { title: 'Label', key: 'label' },
         { title: 'Subtitle', key: 'subtitle' },
         { title: 'Volume', key: 'volume' },
@@ -22,41 +26,52 @@
     ]
 
     const publisherMap = computed(() =>
-        new Map(publishers.value.map(publisher => [publisher.id, publisher]))
+        generatePublisherMap(publishers.value)
+    )
+
+    const labelMap = computed(() =>
+        new Map(
+            publishers.value.flatMap(publisher => publisher.label_records)
+                .map(label => [label.id, label])
+        )
     )
 
     const authorMap = computed(() =>
-        new Map(authors.value.map(author => [author.id, author]))
+        generateAuthorMap(authors.value)
     )
 
     const search = ref('')
     const booksForTable = computed(() =>
         props.books.map(book => {
             const publisher = publisherMap.value.get(book.publisher_id)
+            const label = labelMap.value.get(book.label_id)
 
             const bookAuthors = book.author_ids
                 .map(id => authorMap.value.get(id))
-                .filter((author): author is Author => author != null)
+                .filter((author): author is AuthorView => author != null)
 
+            const authorFilterText = bookAuthors
+                .map(author => generateAuthorSearchText(author))
+                .join(" ")
+
+            const publisherFilterText = publisher
+                ? generatePublisherSearchText(publisher)
+                : null
 
             return {
                 ...book,
-                publisher_record: publisher,
+                publisher: publisher?.name,
+                publisher_id: publisher?.id,
                 author_records: bookAuthors,
+                label: label?.name,
                 _searchText: [
                     book.title,
                     book.yomigana,
-                    publisher?.name,
-                    publisher?.yomigana,
-                    book.label,
+                    label?.name,
                     book.registration_date,
                     book.read_date,
-                    ...bookAuthors.map(record => record.name),
-                    ...bookAuthors.map(record => record.yomigana),
-                    ...(publisher?.alias_records ?? []).map(record => record.alias),
-                    ...bookAuthors.flatMap(
-                        record => record.alias_records.map(alias => alias.alias)
-                    )
+                    authorFilterText,
+                    publisherFilterText,
                 ]
                     .filter(value => value != null)
                     .join(" ")
@@ -76,8 +91,7 @@
     }
 
     const customKeySort = {
-        publisher_record: (a: Publisher, b: Publisher) => a.name.localeCompare(b.name),
-        author_records: (a: Author[], b: Author[]) => {
+        author_records: (a: AuthorView[], b: AuthorView[]) => {
             const aNames = [...a]
                 .sort((x, y) => x.name.localeCompare(y.name, "ja"))
                 .map(author => author.name)
@@ -90,12 +104,11 @@
 
             return aNames.localeCompare(bNames, "ja")
         },
-        title: (a: string, b: string) => a.localeCompare(b, "ja"),
     }
 
     onMounted(async () => {
-        authors.value = await knockApi<Author[]>("/api/author") ?? []
-        publishers.value = await knockApi<Publisher[]>("/api/publisher") ?? []
+        authors.value = await knockApi<AuthorView[]>("/api/author") ?? []
+        publishers.value = await knockApi<PublisherView[]>("/api/publisher") ?? []
     })
 
 </script>
@@ -135,9 +148,9 @@
             </template>
         </template>
 
-        <template #item.publisher_record="{ item }">
-            <RouterLink :to="`/publisher/${item.publisher_record?.id}`">
-                {{ item.publisher_record?.name }}
+        <template #item.publisher="{ item }">
+            <RouterLink :to="`/publisher/${item.publisher_id}`">
+                {{ item.publisher }}
             </RouterLink>
         </template>
     </v-data-table>
