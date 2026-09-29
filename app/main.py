@@ -7,11 +7,13 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.book import book_router
 from app.bill import bill_router
 from app.ndl import ndl_router
+from app.payslip import payslip_router
 from app.db import UniqueConstraintError, DomainValidationError, NotFoundError, NotNullViolationError
 
 app = FastAPI()
 app.include_router(book_router)
 app.include_router(bill_router)
+app.include_router(payslip_router)
 app.include_router(ndl_router)
 
 origins = [

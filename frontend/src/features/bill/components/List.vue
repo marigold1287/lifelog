@@ -2,6 +2,7 @@
     import { onMounted, ref } from "vue"
     import type { BillView, BillApi } from "../types"
     import { billTypeLabels } from "../types"
+    import Chart from "./BarChart.vue"
 
     const bills = ref<BillView[]>([])
 
@@ -59,5 +60,16 @@
                 </RouterLink>
             </template>
         </v-data-table>
+
+        <Chart
+            :bills="bills"
+            type="usage"
+        />
+
+        <Chart
+            :bills="bills"
+            type="total"
+        />
+
     </v-card>
 </template>

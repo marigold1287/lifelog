@@ -62,13 +62,24 @@ export function formatDate(date: Date): string {
 }
 
 export function parseDate(value: string): Date {
-    const [year, month, day] = value.split("-").map(Number)
-
-    if (typeof year !== "number" || typeof month !== "number" || typeof day !== "number") {
-        throw Error("無効なフォーマットです。YYYY-MM-DDで入力してください")
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
+    if (!match) {
+        throw new Error("無効なフォーマットです。YYYY-MM-DDで入力してください")
     }
 
-    return new Date(year, month - 1, day)
+    const [year, month, day] = match.slice(1).map(Number)
+    const date = new Date(year, month - 1, day)
+
+    // 2026-02-31 のような存在しない日付は繰り上がるので、戻して確認する
+    if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+    ) {
+        throw new Error("存在しない日付です")
+    }
+
+    return date
 }
 
 export function getErrorMessage(error: unknown): string {

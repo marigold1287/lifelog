@@ -1,24 +1,22 @@
 <script setup lang="ts">
     import { watch, ref } from "vue"
     import { useRoute, useRouter } from "vue-router"
-    import type { PublisherInput } from "../types"
+    import type { Input } from "../types"
     import { getErrorMessage } from "@/api"
-    import { get, getWorks, update, remove } from "../api"
-    import type { WorkView } from "@/features/book/work/types"
-    import BookWorkList from "@/features/book/components/BookWorkList.vue"
-    import PublisherForm from "./Form.vue"
+    import { get, update, remove } from "../api"
+    import Form from "./Form.vue"
 
-    const publisher = ref<PublisherInput | null>(null)
-    const works = ref<WorkView[]>([])
+    const payslip = ref<Input | null>(null)
     const route = useRoute()
     const router = useRouter()
     const errorMessage = ref("")
     
     async function submitUpdate() {
-        if (!publisher.value) return
+        if (!payslip.value) return
 
         try {
-            await update(publisher.value, `${route.params.id}`)
+            console.log(payslip.value)
+            await update(payslip.value, `${route.params.id}`)
             alert("更新しました")
         } catch (error) {
             console.log(getErrorMessage(error))
@@ -27,13 +25,13 @@
     }
 
     async function submitDelete() {
-        if (!publisher.value) return
+        if (!payslip.value) return
         if (!confirm("削除しますか?")) return
 
         try {
             await remove(`${route.params.id}`)
             alert("削除しました")
-            await router.push("/publisher")
+            await router.push("/payslip")
         } catch (error) {
             errorMessage.value = getErrorMessage(error)
         }
@@ -43,8 +41,8 @@
         () => route.params.id,
         async (id) => {
             try {
-                publisher.value = await get(`${id}`)
-                works.value = await getWorks(`${id}`);
+                payslip.value = await get(`${id}`)
+                console.log(payslip.value)
             } catch (error) {
                 alert(getErrorMessage(error))
             }
@@ -54,9 +52,9 @@
 </script>
 
 <template>
-    <div v-if="publisher">
-        <PublisherForm 
-            v-model="publisher"
+    <div v-if="payslip">
+        <Form 
+            v-model="payslip"
             :error-message="errorMessage"
             @submit="submitUpdate"
         />
@@ -70,12 +68,6 @@
         >
         Delete
         </v-btn>
-
-        <h3>作品リスト</h3>
-        <BookWorkList
-            :works="works"
-        />
-
     </div>
 
 </template>

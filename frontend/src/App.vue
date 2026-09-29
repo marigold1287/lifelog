@@ -16,6 +16,7 @@
         <v-list-item to="/bill/electric" title="Electric Bill" />
         <v-list-item to="/bill/gas" title="Gas Bill" />
         <v-list-item to="/bill/water" title="Water Bill" />
+        <v-list-item to="/payslip" title="Payslip" />
       </v-list>
     </v-navigation-drawer>
 
