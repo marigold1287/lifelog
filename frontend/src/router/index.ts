@@ -3,6 +3,8 @@ import HomeView from "@/components/HomeView.vue"
 import bookRoutes from "@/features/book/router"
 import billRoutes from "@/features/bill/router"
 import payslipRoutes from "@/features/payslip/router"
+import assetRoutes from "@/features/asset/router"
+import subsidyRoutes from "@/features/subsidy/router"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,6 +13,8 @@ const router = createRouter({
     ...bookRoutes,
     ...billRoutes,
     ...payslipRoutes,
+    ...assetRoutes,
+    ...subsidyRoutes,
   ],
 })
 

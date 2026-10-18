@@ -21,6 +21,8 @@ engine = create_engine(
 class Base(DeclarativeBase):
     pass
 
+class ViewBase(DeclarativeBase):
+    pass
 
 SessionLocal = sessionmaker(engine)
 

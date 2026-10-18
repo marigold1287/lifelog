@@ -35,7 +35,7 @@
     <PublisherForm 
         v-model="publisher"
         @submit="submit"
-        :name-error="errorMessage"
+        :error-message="errorMessage"
     />
 
 </template>

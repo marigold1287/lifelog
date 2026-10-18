@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select
+from sqlalchemy import select, func
 from app.db import safe_commit, NotFoundError
 from .schemas import UpdateSchema, CreateSchema
 from .models import Payslip
@@ -51,3 +51,21 @@ def delete(session: Session, key: int) -> None:
     session.delete(record)
 
     safe_commit(session)
+
+
+def get_deduction_total_by_date(
+    session: Session,
+):
+    stmt = (
+        select(
+            Payslip.date,
+            func.sum(Payslip.total_shikyu).label("nenshu"),
+            func.sum(Payslip.tsukin_teate).label("tsukin_teate"),
+            func.sum(Payslip.kenko_hoken + Payslip.kosei_nenkin + Payslip.koyo_hoken + Payslip.kodomo_shienkin).label("shakai_hoken_ryo"),
+            func.sum(Payslip.shotoku_zei).label("shotoku_zei"),
+        )
+        .group_by(Payslip.date)
+        .order_by(Payslip.date)
+    )
+
+    return session.execute(stmt).all()

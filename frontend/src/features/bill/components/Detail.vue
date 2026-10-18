@@ -56,7 +56,7 @@
         <BillForm 
             v-model="bill"
             :providers="providers"
-            :name-error="errorMessage"
+            :error-message="errorMessage"
             @submit="onSubmitUpdate"
         />
         <v-btn

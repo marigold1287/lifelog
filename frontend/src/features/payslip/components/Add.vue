@@ -71,7 +71,7 @@
     <Form 
         v-model="payslip"
         @submit="submit"
-        :name-error="errorMessage"
+        :error-message="errorMessage"
     />
 
 </template>
