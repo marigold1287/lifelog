@@ -5,6 +5,8 @@ import billRoutes from "@/features/bill/router"
 import payslipRoutes from "@/features/payslip/router"
 import assetRoutes from "@/features/asset/router"
 import subsidyRoutes from "@/features/subsidy/router"
+import dailyRoutes from "@/features/daily/router"
+import healthRoutes from "@/features/health/router"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,6 +17,8 @@ const router = createRouter({
     ...payslipRoutes,
     ...assetRoutes,
     ...subsidyRoutes,
+    ...dailyRoutes,
+    ...healthRoutes,
   ],
 })
 

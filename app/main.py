@@ -10,6 +10,8 @@ from app.ndl import ndl_router
 from app.payslip import payslip_router
 from app.asset import asset_router
 from app.subsidy import subsidy_router
+from app.daily import daily_router
+from app.health import health_router
 from app.db import UniqueConstraintError, DomainValidationError, NotFoundError, NotNullViolationError
 
 app = FastAPI()
@@ -19,6 +21,9 @@ app.include_router(payslip_router)
 app.include_router(ndl_router)
 app.include_router(asset_router)
 app.include_router(subsidy_router)
+app.include_router(daily_router)
+app.include_router(health_router)
+
 
 origins = [
     "http://localhost:5173",

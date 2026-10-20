@@ -3,6 +3,7 @@
     import type { AssetView } from "../types"
     import { getAssetList } from "../api"
     import AreaChart from "./AreaChart.vue"
+    import { formatMoney } from "@/utils/utils.ts"
 
     const assets = ref<AssetView[]>([])
 
@@ -43,6 +44,11 @@
             :search="search"
             :headers="headers"
         >
+          <template #item.cash="{ value }">{{ formatMoney(value) }}</template>
+          <template #item.fund="{ value }">{{ formatMoney(value) }}</template>
+          <template #item.stock="{ value }">{{ formatMoney(value) }}</template>
+          <template #item.pension="{ value }">{{ formatMoney(value) }}</template>
+          <template #item.total="{ value }">{{ formatMoney(value) }}</template>
         </v-data-table>
 
         <AreaChart

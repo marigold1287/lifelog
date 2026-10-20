@@ -2,6 +2,8 @@
     import { computed, ref, watch } from "vue"
     import type { AccountSummary,EntryResponse } from "../types.ts"
     import { get, getEntries } from "../api.ts"
+    import { formatMoney } from "@/utils/utils.ts"
+
 
     import AccountTree from "./AccountTree.vue"
 
@@ -37,13 +39,6 @@
     const months: (number | null)[] = [
       null, ...Array.from({ length: 12 }, (_, i) => i + 1)
     ]
-
-    const formatMoney = (value: number) =>
-    new Intl.NumberFormat("ja-JP", {
-        style: "currency",
-        currency: "JPY",
-        maximumFractionDigits: 0,
-    }).format(value)
 
     let requestId = 0
 
@@ -96,6 +91,9 @@
     <header class="page-header">
       <div>
         <h1>家計簿</h1>
+        <RouterLink :to="'/transaction/add'">
+          <v-btn>Add New</v-btn>
+        </RouterLink>
         <p class="subtitle">収支のサマリー</p>
       </div>
 
@@ -190,6 +188,8 @@
               {{ item.trade_date }}
             </RouterLink>
           </template>
+
+          <template #item.quantity="{ value }">{{ formatMoney(value) }}</template>
         </v-data-table>
       </v-card>
 

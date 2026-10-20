@@ -1,16 +1,11 @@
 <script setup lang="ts">
     import type { AccountNode } from "../types"
+    import { formatMoney } from "@/utils/utils.ts"
 
     defineProps<{
     nodes: AccountNode[]
     }>()
 
-    const formatMoney = (value: number) =>
-    new Intl.NumberFormat("ja-JP", {
-        style: "currency",
-        currency: "JPY",
-        maximumFractionDigits: 0,
-    }).format(value)
 </script>
 
 <template>

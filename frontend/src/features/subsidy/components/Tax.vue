@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue"
 import type { Tax } from "../types"
 import { getTax } from "../api"
+import { formatMoney } from "@/utils/utils"
  	
 const nenmatsu_headers = [
   { title: '年', key: 'year' },
@@ -42,7 +43,6 @@ onMounted(async () => {
 })
 </script>
 
-
 <template>
     <v-card
         title="年末調整"
@@ -53,8 +53,17 @@ onMounted(async () => {
         :items="tax?.nenmatsu_chosei"
         :sort-by="[{ key: 'year', order: 'desc' }]"
         >
+        <template #item.nenshu="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.total_shakai_hoken_deduction="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.kazei_shotoku="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.paid_shotoku_zei="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.shotoku_zei="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.nenmatsu_chosei_kabusoku="{ value }">{{ formatMoney(value) }}</template>
+
         </v-data-table>
     </v-card>
+
+
     <v-card
         title="確定申告"
         flat
@@ -64,8 +73,17 @@ onMounted(async () => {
         :items="tax?.kakutei_shinkoku"
         :sort-by="[{ key: 'year', order: 'desc' }]"
         >
+        <template #item.shotoku="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.kazei_shotoku="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.furusato="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.shotoku_zei_donation="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.paid_shotoku_zei="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.shotoku_zei="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.kanpu="{ value }">{{ formatMoney(value) }}</template>
         </v-data-table>
     </v-card>
+
+
     <v-card
         title="住民税"
         flat
@@ -75,6 +93,12 @@ onMounted(async () => {
         :items="tax?.jumin_zei"
         :sort-by="[{ key: 'year', order: 'desc' }]"
         >
+        <template #item.total_deduction="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.kazei_shotoku="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.shimin_zei="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.kenmin_zei="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.jumin_zei="{ value }">{{ formatMoney(value) }}</template>
+        <template #item.furusato_limit="{ value }">{{ formatMoney(value) }}</template>
         </v-data-table>
     </v-card>
 </template>

@@ -35,6 +35,13 @@ const groups = [
       { to: '/asset/kakeibo', title: '家計簿', icon: 'mdi-notebook' },
     ],
   },
+  {
+    title: '健康',
+    items: [
+      { to: '/daily', title: 'Daily Log', icon: 'mdi-chart-timeline-variant' },
+      { to: '/health', title: '健康診断', icon: 'mdi-clipboard-pulse-outline' },
+    ],
+  },
 ]
 </script>
 
