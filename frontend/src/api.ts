@@ -68,6 +68,12 @@ export function parseDate(value: string): Date {
     }
 
     const [year, month, day] = match.slice(1).map(Number)
+
+    if (typeof year == "undefined" || typeof month == "undefined" || typeof day == "undefined") {
+        throw new Error("無効なフォーマットです。YYYY-MM-DDで入力してください")
+    }
+
+
     const date = new Date(year, month - 1, day)
 
     // 2026-02-31 のような存在しない日付は繰り上がるので、戻して確認する

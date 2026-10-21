@@ -1,5 +1,7 @@
+from pathlib import Path
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
@@ -37,9 +39,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+@app.get("/api")
 def read_root():
     return {"Hello": "World"}
+
+DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+
+if DIST.exists():
+    app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
+
+    @app.get("/{full_path:path}")
+    def spa(full_path: str):
+        file = DIST / full_path
+        if full_path and file.is_file():
+            return FileResponse(file)
+        return FileResponse(DIST / "index.html")
 
 @app.exception_handler(UniqueConstraintError)
 async def unique_constraint_exception_handler(request: Request, exc: UniqueConstraintError):

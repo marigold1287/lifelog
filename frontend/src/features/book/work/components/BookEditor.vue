@@ -4,6 +4,10 @@
 
     const books = defineModel<BookInput[]>({ required: true })
 
+    type Response = {
+        link: string
+    }
+
     function addItem() {
         books.value.push({
             id: null,
@@ -38,7 +42,7 @@
     const openNdl = async (isbn: string) => {
         try {
             const normalizedIsbn = isbn.replace(/[-\s]/g, "")
-            const data = await knockApi(
+            const data = await knockApi<Response>(
                 `/api/ndl/${normalizedIsbn}`
             )
 

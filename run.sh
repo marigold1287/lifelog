@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-cd ~/dev/python/lifelog
+cd "$(dirname "$0")"
+
 source .venv/bin/activate
 
 fastapi dev --port 8001 &

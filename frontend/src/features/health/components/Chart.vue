@@ -109,6 +109,9 @@ function generateOption(
 
   // 修正: markLineData が存在する場合のみ設定し、ハードコードを修正
   if (markLineData.length > 0) {
+    if (series[0] === undefined) {
+      throw new Error("Can't access Series[0]")
+    } 
     series[0].markLine = {
       silent: true,
       symbol: ['none', 'none'],
@@ -122,10 +125,10 @@ function generateOption(
   }
 
   const yMin = Math.min(
-    ...[lowerLimit, ...data.map(d => d[1])].filter(v => v != null)
+    ...[lowerLimit, ...data.map(d => d[1])].filter(v => v != null && typeof v == "number")
   );
   const yMax = Math.max(
-    ...[upperLimit, ...data.map(d => d[1])].filter(v => v != null)
+    ...[upperLimit, ...data.map(d => d[1])].filter(v => v != null && typeof v == "number")
   );
 
   return {
