@@ -97,7 +97,7 @@ def get_or_create_publisher_and_label(
         publisher = Publisher(name=publisher)
         session.add(publisher)
         label = Label(
-            name=label,
+            name=label_name,
             publisher=publisher
         )
         session.add(label)
