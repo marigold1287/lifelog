@@ -64,6 +64,7 @@ def create(session: Session, data: InputSchema) -> Work:
             title=record.title,
             volume=record.volume,
             isbn=record.isbn,
+            ndlbib=record.ndlbib,
             amazon_asin=record.amazon_asin,
             registration_date=record.registration_date,
         )
@@ -143,6 +144,7 @@ def update(session: Session, key: int, data: InputSchema):
         current.title = update.title
         current.volume = update.volume
         current.isbn = update.isbn
+        current.ndlbib = update.ndlbib
         current.amazon_asin = update.amazon_asin
         current.registration_date = update.registration_date
         
@@ -159,6 +161,7 @@ def update(session: Session, key: int, data: InputSchema):
         new_book = Book(
             title=record.title,
             volume=record.volume,
+            ndlbib=record.ndlbib,
             isbn=record.isbn,
             amazon_asin=record.amazon_asin,
             registration_date=record.registration_date,

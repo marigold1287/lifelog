@@ -33,10 +33,21 @@ async def get_ndl_link(isbn: str):
 
     link = root.findtext(".//item/link")
 
+
     if not link:
         raise HTTPException(
             status_code=404,
             detail="NDLに該当する書籍が見つかりません",
         )
 
-    return {"link": link}
+    ns = {
+        "dc": "http://purl.org/dc/elements/1.1/",
+        "xsi": "http://www.w3.org/2001/XMLSchema-instance",
+    }
+
+    ndlbib = root.find(
+        ".//dc:identifier[@xsi:type='dcndl:NDLBibID']",
+        ns,
+    ).text
+
+    return {"link": link, "ndlbib": ndlbib}
