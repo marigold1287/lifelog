@@ -21,6 +21,7 @@ export interface BookInput {
     title: string | null
     volume: string | null
     isbn: string | null
+    ndlbib: string | null
     amazon_asin: string | null
     registration_date: Date
     read_dates: ReadDateInput[]
@@ -31,6 +32,7 @@ export interface BookResponse {
     title: string | null
     volume: string | null
     isbn: string | null
+    ndlbib: string | null
     amazon_asin: string | null
     registration_date: string
     read_dates: ReadDateResponse[]

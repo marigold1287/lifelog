@@ -24,6 +24,7 @@ class BookInputSchema(BaseModel):
     title: str | None
     volume: str | None
     isbn: str | None
+    ndlbib: str | None
     amazon_asin: str | None
     registration_date: date
     read_dates: list[ReadDateSchema]
@@ -36,6 +37,16 @@ class BookInputSchema(BaseModel):
 
         return value.strip().replace("-", "").replace("ー", "")
 
+
+    @field_validator("ndlbib")
+    @classmethod
+    def validate_ndlbib(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+
+        return value.strip()
+
+    
     @field_validator("amazon_asin")
     @classmethod
     def validate_amazon_asin(cls, value: str | None) -> str | None:
@@ -56,6 +67,7 @@ def to_input_schema(book: Book) -> BookInputSchema:
         title=book.title,
         volume=book.volume,
         isbn=book.isbn,
+        ndlbib=book.ndlbib,
         amazon_asin=book.amazon_asin,
         registration_date=book.registration_date,
         read_dates=read_dates

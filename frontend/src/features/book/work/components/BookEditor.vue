@@ -6,6 +6,7 @@
 
     type Response = {
         link: string
+        ndlbib: string | null
     }
 
     function addItem() {
@@ -14,6 +15,7 @@
             title: null,
             volume: null,
             isbn: null,
+            ndlbib: null,
             amazon_asin: null,
             registration_date: new Date(),
             read_dates: [],
@@ -39,15 +41,15 @@
         item.read_dates.splice(index, 1)
     }
 
-    const openNdl = async (isbn: string) => {
+    const searchNdlBib = async (index: number, isbn: string) => {
         try {
             const normalizedIsbn = isbn.replace(/[-\s]/g, "")
             const data = await knockApi<Response>(
                 `/api/ndl/${normalizedIsbn}`
             )
 
-            if (data) {
-                window.open(data.link, "_blank")
+            if (data && data.ndlbib !== null && books.value[index] !== undefined) {
+                books.value[index].ndlbib = data.ndlbib
             }
         } catch(error) {
             if (error instanceof CustomApiError) {
@@ -90,6 +92,21 @@
             density="compact"
             hide-details
         />
+        <v-text-field
+            v-model="item.ndlbib"
+            label="NDLBib"
+            density="compact"
+            hide-details
+        />
+
+        <v-btn 
+            v-if="item.ndlbib" 
+            icon="mdi-open-in-new"
+            variant="text"
+            size="small"
+            :href="`https://ndlsearch.ndl.go.jp/books/R100000002-I${item.ndlbib}`"
+            target="_blank"
+        />
 
         <v-text-field
             v-model="item.isbn"
@@ -98,13 +115,18 @@
             hide-details
         />
 
-        <v-btn 
-            v-if="item.isbn" 
-            icon="mdi-open-in-new"
-            variant="text" 
-            size="small" 
-            @click="openNdl(item.isbn)" 
-        />
+        <v-tooltip text="NDLサーチで書誌情報を検索" location="top">
+        <template #activator="{ props }">
+            <v-btn
+            v-if="item.isbn"
+            v-bind="props"
+            icon="mdi-book-search-outline"
+            variant="text"
+            size="small"
+            @click="searchNdlBib(index, item.isbn)"
+            />
+        </template>
+        </v-tooltip>
 
         <v-text-field
             v-model="item.amazon_asin"

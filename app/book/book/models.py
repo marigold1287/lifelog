@@ -17,6 +17,7 @@ class Book(Base):
     volume: Mapped[str | None] = mapped_column()
     isbn: Mapped[str | None] = mapped_column()
     amazon_asin: Mapped[str | None] = mapped_column()
+    ndlbib: Mapped[str | None] = mapped_column()
     registration_date: Mapped[date] = mapped_column(default=date.today)
 
     work: Mapped["Work"] = relationship(back_populates="books")
@@ -39,6 +40,11 @@ class Book(Base):
     @validates("volume")
     def validate_volume(self, key, volume):
         return normalize_value(volume)
+
+
+    @validates("ndlbib")
+    def validate_ndlbib(self, key, ndl):
+        return normalize_value(ndl)
 
     @validates("isbn")
     def validate_isbn(self, key, isbn: str | None):
