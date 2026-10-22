@@ -91,7 +91,7 @@ def to_input_schema(work: Work) -> InputResponseSchema:
     ]
     book_records = [
         to_book_input_schema(book)
-        for book in work.books
+        for book in sorted(work.books, key=lambda book: book.volume)
     ]
 
     return InputResponseSchema(
