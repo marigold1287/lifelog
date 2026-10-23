@@ -234,22 +234,6 @@ class Price(Base):
 
     holding: Mapped[Holding] = relationship(back_populates="prices")
 
-class LegacySnapshot(Base):
-    """移行前の記録。日付×区分の評価額。合計は保存しない（区分の和で出す）。"""
-
-    __tablename__ = "legacy_snapshot"
-
-    date: Mapped[date] = mapped_column(Date, primary_key=True)
-    category: Mapped[str] = mapped_column(String(20), primary_key=True)  # cash/fund/pension/stock
-    value: Mapped[int] = mapped_column(BigInteger)
-
-    __table_args__ = (
-        CheckConstraint(
-            "category IN ('cash','fund','pension','stock')",
-            name="legacy_snapshot_category_check",
-        ),
-    )
-
 
 # ---------------------------------------------------------------------------
 # Future work（今は作らない）

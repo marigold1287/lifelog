@@ -141,7 +141,7 @@ def upgrade() -> None:
  
 def downgrade() -> None:
     # 逆順（上のVIEWから）に消す
-    op.execute(OLD_COMPUTED_SNAPSHOT)
-    op.execute(OLD_DAILY_BY_CATEGORY)
-    op.execute(OLD_DAILY_TOTAL)
+    op.execute("DROP VIEW IF EXISTS daily_total")
+    op.execute("DROP VIEW IF EXISTS daily_by_category")
+    op.execute("DROP VIEW IF EXISTS computed_snapshot")
  
