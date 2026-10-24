@@ -1,0 +1,625 @@
+{
+    "現金（財布）": {
+        "type": "cash",
+        "currency": "JPY",
+        "sort_order": 0
+    },
+    "クレジットカード": {
+        "type": "card",
+        "currency": "JPY",
+        "sort_order": 0
+    },
+    "銀行口座": {
+        "type": "bank",
+        "currency": "JPY",
+        "sort_order": 0
+    },
+    "iDeCo": {
+        "type": "pension",
+        "currency": "JPY",
+        "sort_order": 0
+    },
+    "旧NISA": {
+        "type": "nisa",
+        "currency": "JPY",
+        "sort_order": 0
+    },
+    "NISAつみたて投資枠": {
+        "type": "nisa",
+        "currency": "JPY",
+        "sort_order": 1
+    },
+    "NISA成長投資枠": {
+        "type": "nisa",
+        "currency": "JPY",
+        "sort_order": 2
+    },
+    "証券口座(特定)": {
+        "type": "taxable",
+        "currency": "JPY",
+        "sort_order": 0
+    },
+    "期首残高": {
+        "type": "equity",
+        "currency": "JPY",
+        "sort_order": 0
+    },
+    "残高調整": {
+        "type": "equity",
+        "currency": "JPY",
+        "sort_order": 1
+    },
+    "未分類の支払元": {
+        "type": "equity",
+        "currency": "JPY",
+        "sort_order": 2
+    },
+    "食費": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 0,
+        "children": [
+            {
+                "name": "食料品",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "お菓子",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "飲み物",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            },
+            {
+                "name": "お酒",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 3
+            },
+            {
+                "name": "カフェ",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 4
+            },
+            {
+                "name": "朝ご飯",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 5
+            },
+            {
+                "name": "昼ご飯",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 6
+            },
+            {
+                "name": "晩ご飯",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 7
+            }
+        ]
+    },
+    "水道・光熱": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 1,
+        "children": [
+            {
+                "name": "電気料金",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "ガス料金",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "水道料金",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            }
+        ]
+    },
+    "教育・教養": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 2,
+        "children": [
+            {
+                "name": "参考書",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "受験料",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            }
+        ]
+    },
+    "住まい": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 3,
+        "children": [
+            {
+                "name": "家賃",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "住宅保険",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "その他",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            }
+        ]
+    },
+    "通信": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 4,
+        "children": [
+            {
+                "name": "携帯電話料金",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "インターネット関連費",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "切手・はがき",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            },
+            {
+                "name": "宅配便",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 3
+            },
+            {
+                "name": "放送サービス料金",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 4
+            },
+            {
+                "name": "その他",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 5
+            }
+        ]
+    },
+    "美容・衣服": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 5,
+        "children": [
+            {
+                "name": "アクセサリー・小物",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "コスメ",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "散髪",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            },
+            {
+                "name": "洋服",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 3
+            },
+            {
+                "name": "下着",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 4
+            },
+            {
+                "name": "クリーニング",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 5
+            },
+            {
+                "name": "その他",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 6
+            }
+        ]
+    },
+    "税金": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 6,
+        "children": [
+            {
+                "name": "源泉徴収",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            }
+        ]
+    },
+    "旅行": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 7,
+        "children": [
+            {
+                "name": "ホテル",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            }
+        ]
+    },
+    "エンタメ": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 8,
+        "children": [
+            {
+                "name": "書籍",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "漫画",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "音楽",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            },
+            {
+                "name": "映画・動画",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 3
+            },
+            {
+                "name": "レジャー",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 4
+            },
+            {
+                "name": "イベント",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 5
+            },
+            {
+                "name": "ゲーム",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 6
+            },
+            {
+                "name": "グッズなど",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 7
+            }
+        ]
+    },
+    "日用雑貨": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 9,
+        "children": [
+            {
+                "name": "消耗品",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "雑貨",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "文具",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            },
+            {
+                "name": "家具",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 3
+            },
+            {
+                "name": "家電",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 4
+            },
+            {
+                "name": "その他",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 5
+            }
+        ]
+    },
+    "交通": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 10,
+        "children": [
+            {
+                "name": "電車",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "バス",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "飛行機",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            },
+            {
+                "name": "電子マネー",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 3
+            },
+            {
+                "name": "タクシー",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 4
+            },
+            {
+                "name": "その他",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 5
+            }
+        ]
+    },
+    "交際費": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 11,
+        "children": [
+            {
+                "name": "飲み会",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "プレゼント",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "ご祝儀・香典",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            },
+            {
+                "name": "その他",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 3
+            }
+        ]
+    },
+    "寄付": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 12,
+        "children": [
+            {
+                "name": "ふるさと納税",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "寄附金控除対象寄附金",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "その他",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            }
+        ]
+    },
+    "医療・保険": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 13,
+        "children": [
+            {
+                "name": "病院代",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "薬代",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "新生命保険料",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            },
+            {
+                "name": "介護医療保険料",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 3
+            },
+            {
+                "name": "その他保険料",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 4
+            },
+            {
+                "name": "その他",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 5
+            }
+        ]
+    },
+    "その他": {
+        "type": "expense",
+        "currency": "JPY",
+        "sort_order": 14,
+        "children": [
+            {
+                "name": "ポイント利用",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "立替金",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "値引",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            },
+            {
+                "name": "その他",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 3
+            }
+        ]
+    },
+    "収入": {
+        "type": "income",
+        "currency": "JPY",
+        "sort_order": 15,
+        "children": [
+            {
+                "name": "給与所得",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 0
+            },
+            {
+                "name": "賞与",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 1
+            },
+            {
+                "name": "臨時収入",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 2
+            },
+            {
+                "name": "立替金返済",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 3
+            },
+            {
+                "name": "配当金(上場)",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 4
+            },
+            {
+                "name": "配当金(非上場)",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 5
+            },
+            {
+                "name": "雑所得",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 6
+            },
+            {
+                "name": "その他",
+                "type": "expense",
+                "currency": "JPY",
+                "sort_order": 7
+            }
+        ]
+    }
+}
