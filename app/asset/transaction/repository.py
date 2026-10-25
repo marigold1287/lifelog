@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select, func
 from app.db import safe_commit, NotFoundError, sync_records
-from app.asset.models import Transaction, Entry, TxType, Account
+from app.asset.models import Transaction, Entry, TxType, Account, HoldingType, Holding
 from .schemas import InputSchema, EntryInputSchema
+from app.asset.price.repository import create_or_get_price_from_entry
 
 def get_list(session: Session) -> list[Transaction]:
     stmt = select(Transaction).order_by(Transaction.trade_date.desc())
@@ -65,16 +66,19 @@ def create(session: Session, data: InputSchema) -> Transaction:
     )
 
     for entry in data.entries:
-        transaction.entries.append(
-            Entry(
-                account_id=entry.account_id,
-                holding_id=entry.holding_id,
-                quantity=entry.quantity,
-                unit_price=entry.unit_price,
-                item_name=entry.item_name,
-                memo=entry.memo,
-            )
-        )
+        new_entry = Entry(
+                        account_id=entry.account_id,
+                        holding_id=entry.holding_id,
+                        quantity=entry.quantity,
+                        unit_price=entry.unit_price,
+                        item_name=entry.item_name,
+                        memo=entry.memo,
+                    )
+        transaction.entries.append(new_entry)
+        holding = session.get(Holding, entry.holding_id)
+        if (transaction.type in [TxType.BUY, TxType.SELL]) and (holding.type in [HoldingType.FUND, HoldingType.STOCK]):
+            create_or_get_price_from_entry(session, new_entry)
+
 
     session.add(transaction)
     safe_commit(session)
@@ -97,6 +101,11 @@ def update(session: Session, key: int, data: InputSchema) -> Transaction:
         current.unit_price=update.unit_price
         current.item_name=update.item_name
         current.memo=update.memo
+        if transaction.type in [TxType.BUY, TxType.SELL]:
+            holding = session.get(Holding, update.holding_id)
+
+            if holding.type in [HoldingType.FUND, HoldingType.STOCK]:
+                create_or_get_price_from_entry(session, current)
 
     def create_record(record: EntryInputSchema):
         new_entry = Entry(
@@ -107,6 +116,8 @@ def update(session: Session, key: int, data: InputSchema) -> Transaction:
             item_name=record.item_name,
             memo=record.memo,
         )
+        if (transaction.type in [TxType.BUY, TxType.SELL]) and (new_entry.holding.type in [HoldingType.FUND, HoldingType.STOCK]):
+            create_or_get_price_from_entry(session, new_entry)
         transaction.entries.append(new_entry)
 
     sync_records(
