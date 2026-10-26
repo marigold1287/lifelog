@@ -45,3 +45,8 @@ export interface EntryView {
   profit_loss: number
   profit_loss_rate: number
 }
+
+export interface PriceResponse {
+  price_date: string
+  price: number
+}

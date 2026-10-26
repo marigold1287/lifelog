@@ -271,22 +271,23 @@ async def get_nissei_price(holding: Holding, session: Session):
             )
             session.add(price)
 
-async def main():
-    with SessionLocal() as session:
-        holdings = (
-            session.execute(
-                select(Holding).where(Holding.symbol.is_not(None))
-            )
-            .scalars()
-            .all()
+async def fetch_holding_prices(session: Session):
+    result = {"success": [], "fail": []}
+    holdings = (
+        session.execute(
+            select(Holding).where(Holding.symbol.is_not(None))
         )
+        .scalars()
+        .all()
+    )
 
-        for holding in holdings:
+    for holding in holdings:
+        try:
             if holding.price_source == "ufj":
                 try:
                     int(holding.symbol)
                     await get_ufj_price_from_csv(holding, session)
-                except:
+                except ValueError:
                     await get_ufj_price_from_api(holding, session)
             if holding.price_source == "rakuten":
                 await get_rakuten_price(holding, session)
@@ -294,10 +295,17 @@ async def main():
                 await get_nissei_price(holding, session)
             if holding.price_source == "yfinance":
                 get_yfinance_price(holding, session)
+            result["success"].append(holding.name)
+        except Exception as e:
+            result["fail"].append(holding.name)
 
-        safe_commit(session)
+    safe_commit(session)
+
+    return result
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
-
+    with SessionLocal() as session:
+        result = asyncio.run(fetch_holding_prices(session))
+        print(result)
 
