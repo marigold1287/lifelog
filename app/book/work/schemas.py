@@ -91,7 +91,13 @@ def to_input_schema(work: Work) -> InputResponseSchema:
     ]
     book_records = [
         to_book_input_schema(book)
-        for book in sorted(work.books, key=lambda book: book.volume)
+        for book in sorted(
+            work.books,
+            key=lambda book: (
+                book.volume is None,
+                float(book.volume) if book.volume is not None else 0,
+            ),
+        )
     ]
 
     return InputResponseSchema(
