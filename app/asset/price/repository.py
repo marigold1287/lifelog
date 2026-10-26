@@ -1,8 +1,11 @@
+import asyncio
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select, func, and_
 from app.db import NotFoundError
 from datetime import date
 from app.asset.models import Price, Entry
+from .fetch_prices import fetch_holding_prices
+
 
 def get_latest_price(session: Session, holding_id: int) -> Price | None:
     price = session.execute(
@@ -34,6 +37,16 @@ def get_latest_prices(session: Session) -> dict[int, Price]:
     prices = session.execute(stmt).scalars().all()
     return {p.holding_id: p for p in prices}
 
+def get_prices(session: Session, holding_id: int):
+    return [
+        dict(row)
+        for row in session.execute(
+            select(Price.price_date, Price.price)
+            .where(Price.holding_id == holding_id)
+            .order_by(Price.price_date)
+        ).mappings().all()
+    ]
+
 def get(session: Session, holding_id: int, price_date: date) -> Price:
     price = session.execute(
         select(Price)
@@ -48,6 +61,9 @@ def get(session: Session, holding_id: int, price_date: date) -> Price:
 
     return price
 
+async def fetch_prices(session: Session):
+    result = await fetch_holding_prices(session)
+    return result
 
 def create_or_get_price_from_entry(session: Session, entry: Entry):
     try:

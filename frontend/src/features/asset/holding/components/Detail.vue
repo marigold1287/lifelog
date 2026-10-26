@@ -1,14 +1,16 @@
 <script setup lang="ts">
     import { onMounted, ref, watch, computed } from "vue"
     import { useRoute, useRouter } from "vue-router"
-    import { get, update, remove } from "../api.ts"
+    import { get, update, remove, getPrices } from "../api.ts"
     import { BASE_URL } from "../router.ts"
-    import type { Input, Response } from "../types.ts"
+    import type { Input, Response, PriceResponse } from "../types.ts"
     import { CustomApiError, getErrorMessage } from "@/api"
     import Form from "./Form.vue"
+    import Chart from "./Chart.vue"
 
     const holding = ref<Input | null>(null)
     const response = ref<Response>()
+    const prices = ref<PriceResponse[]>([])
     const entries = computed(() => response.value?.entries ?? [])
 
     const total = computed(() => {
@@ -32,17 +34,6 @@
         const averageUnitPrice = quantity > 0 ? acquisitionCost / quantity * pricePerUnits : 0
 
         const profitLoss = currentValue - acquisitionCost
-
-        console.log({
-            total_quantity: quantity,
-            average_unit_price: averageUnitPrice,
-            acquisition_cost: acquisitionCost,
-            current_value: currentValue,
-            profit_loss: profitLoss,
-            profit_loss_rate: acquisitionCost
-            ? profitLoss / acquisitionCost * 100
-            : 0,
-        })
 
         return {
             total_quantity: quantity,
@@ -91,6 +82,8 @@
     onMounted(async () => {
         const res = await get(`${route.params.id}`);
         response.value = res;
+        prices.value = await getPrices(`${route.params.id}`);
+        console.log(prices.value)
         
         if (res) {
             const { entries, ...formData } = res;
@@ -145,5 +138,9 @@
             </template>
         </v-data-table>
     </div>
+
+    <Chart
+        :data="prices"
+    ></Chart>
 
 </template>
