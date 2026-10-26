@@ -10,9 +10,9 @@ class ResponseSchema(BaseModel):
     symbol: str | None
     total_quantity: int
     acquisition_cost: float
-    current_value: float
-    profit_loss: float
-    profit_loss_rate: float
+    current_value: float | None
+    profit_loss: float | None
+    profit_loss_rate: float | None
     price_per_units: int
 
 
@@ -32,6 +32,7 @@ class ResponseDetailSchema(BaseModel):
     currency: str
     price_source: str | None
     price_per_units: int
+    current_unit_price: float | None
     entries: list["EntrySchema"]
 
 
@@ -40,10 +41,9 @@ class EntrySchema(BaseModel):
     total_quantity: float
     average_unit_price: float
     acquisition_cost: float
-    current_unit_price: float
-    current_value: float
-    profit_loss: float
-    profit_loss_rate: float
+    current_value: float | None
+    profit_loss: float | None
+    profit_loss_rate: float | None
 
 class PriceSchema(BaseModel):
     date: dt.date
