@@ -54,6 +54,13 @@
             v-model="holding.symbol"
             density="compact"
         />
+        入力例
+        <v-list>
+            <v-list-item title="UFJ"><a href="https://emaxis.am.mufg.jp/fund/253425.html" target="_blank">オルカン</a>: URLの「253425」を入れてください</v-list-item>
+            <v-list-item title="Rakuten"><a href=" https://www.rakuten-toushin.co.jp/fund/nav/rivge/" target="_blank">楽天・全世界株式インデックス・ファンド</a>: 基準価額のデータダウンロードリンクがあり、「chart_100032.csv」の数字部分「10032」を入れてください</v-list-item>
+            <v-list-item title="YFinance">8306.T, VT, VTIなどのティッカーコードを入れてください(<a href="https://finance.yahoo.com" target="_blank">Yahoo finance</a>に合わせて入力してください)</v-list-item>
+            <v-list-item title="Nissei"><a href="https://www.nam.co.jp/fundinfo/list/index.html" target="_blank">基準価額一覧</a>でファンドを探し、基準価額等CSVデータダウンロードのリンクから確認できるfund_code「121503」などを入力してください</v-list-item>
+        </v-list>
         <h2>種類</h2>
         <v-select
             v-model="holding.type"
