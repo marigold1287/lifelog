@@ -6,15 +6,53 @@ from dataclasses import dataclass
 
 @dataclass
 class HoldingSummary:
-    total_quantity: int = 0
-    acquisition_cost: Decimal = Decimal("0")
-    current_value: Decimal | None = None
+    holding: Holding
+    price: Price | None = None
+    account_name: str | None = None
+
+    @property
+    def total_quantity(self):
+        total = 0
+        for entry in self.holding.entries:
+            if entry.account.type in [AccountType.EXPENSE, AccountType.INCOME, AccountType.EQUITY]:
+                continue
+            if self.account_name is None or entry.account.name == self.account_name:
+                total += entry.quantity
+        return total
+
+    @property
+    def acquisition_cost(self):
+        cost = 0
+        for entry in self.holding.entries:
+            if entry.account.type in [AccountType.EXPENSE, AccountType.INCOME, AccountType.EQUITY]:
+                continue
+            if self.account_name is None or entry.account.name == self.account_name:
+                cost += (
+                    entry.quantity
+                    * (entry.unit_price or Decimal("1"))
+                    / self.holding.price_per_units
+                )
+        return cost
+
+    @property
+    def current_value(self):
+        if self.price is None:
+            return None
+        else:
+            return round(self.total_quantity * self.price.price / self.holding.price_per_units)
+
+    @property
+    def average_unit_price(self):
+        if self.total_quantity == 0:
+            return None
+        return self.acquisition_cost / self.total_quantity * self.holding.price_per_units
 
     @property
     def profit_loss(self) -> Decimal | None:
         if self.current_value is None:
             return None
-        return self.current_value - self.acquisition_cost
+        return round(self.current_value - self.acquisition_cost)
+
 
     @property
     def profit_loss_rate(self) -> Decimal | None:
@@ -22,43 +60,10 @@ class HoldingSummary:
             return None
         if self.acquisition_cost == 0:
             return Decimal("0")
-        return self.profit_loss / self.acquisition_cost * 100
-
-
-def acquisition_cost(
-    quantity: int,
-    unit_price: Decimal,
-    price_per_units: int,
-) -> Decimal:
-    return (
-        quantity
-        * (unit_price or Decimal("1"))
-        / price_per_units
-    )
-
-def current_value(
-    quantity: int,
-    price: Decimal,
-    price_per_units: int,
-) -> Decimal:
-    return quantity * price / price_per_units
+        return round(self.profit_loss / self.acquisition_cost * 100, 2)
 
 def to_list_response_schema(holding: Holding, latest_price: Price | None):
-    summary = HoldingSummary()
-
-    for entry in holding.entries:
-        (quantity, acquisition_cost_) = get_quantity_and_acquisition_cost(entry, holding.price_per_units)
-
-        summary.total_quantity += quantity
-        summary.acquisition_cost += acquisition_cost_
-    if latest_price:
-        summary.current_value = current_value(
-            summary.total_quantity,
-            latest_price.price,
-            holding.price_per_units,
-        )
-    else:
-        summary.current_value = None
+    summary = HoldingSummary(holding, price=latest_price, account_name=None)
 
     return ResponseSchema(
         id=holding.id,
@@ -66,65 +71,45 @@ def to_list_response_schema(holding: Holding, latest_price: Price | None):
         type=holding.type,
         symbol=holding.symbol,
         total_quantity=summary.total_quantity,
-        acquisition_cost=round(summary.acquisition_cost),
-        current_value=round(summary.current_value) if summary.current_value else None,
-        profit_loss=round(summary.profit_loss) if summary.current_value else None,
-        profit_loss_rate=round(summary.profit_loss_rate, 2) if summary.current_value else None,
+        acquisition_cost=summary.acquisition_cost,
+        current_value=summary.current_value,
+        profit_loss=summary.profit_loss,
+        profit_loss_rate=summary.profit_loss_rate,
         price_per_units=holding.price_per_units,
     )
 
-def get_quantity_and_acquisition_cost(entry: Entry, price_per_units: int):
-    if entry.account.type in [AccountType.EXPENSE, AccountType.INCOME, AccountType.EQUITY]:
-        (quantity, acquisition_cost_) = [Decimal("0"), Decimal("0")]
-    else:
-        quantity = entry.quantity
-        acquisition_cost_ = acquisition_cost(
-            entry.quantity,
-            entry.unit_price,
-            price_per_units,
-        )
-
-    return quantity, acquisition_cost_
-
-
-
 def to_detail_schema(holding: Holding, latest_price: Price | None):
-    summaries = defaultdict(HoldingSummary)
+    summaries = defaultdict(str)
 
     for entry in holding.entries:
-        (quantity, acquisition_cost_) = get_quantity_and_acquisition_cost(entry, holding.price_per_units)
-        if entry.account.type in [AccountType.EXPENSE, AccountType.INCOME, AccountType.EQUITY]:
-            continue
-        summary = summaries[entry.account.name]
-
-        summary.total_quantity += quantity
-        summary.acquisition_cost += acquisition_cost_
-
-    if latest_price is not None:
-        for summary in summaries.values():
-            summary.current_value = current_value(
-                summary.total_quantity,
-                latest_price.price,
-                holding.price_per_units,
-            )
+        summaries[entry.account.name] = HoldingSummary(holding, latest_price, entry.account.name)
 
     entries = [
         EntrySchema(
             account=account_name,
             total_quantity=summary.total_quantity,
-            average_unit_price=round(
-                summary.acquisition_cost
-                / summary.total_quantity
-                * holding.price_per_units
-            ),
-            acquisition_cost=round(summary.acquisition_cost),
-            current_value=round(summary.current_value) if summary.current_value else None,
-            profit_loss=round(summary.profit_loss) if summary.current_value else None,
-            profit_loss_rate=round(summary.profit_loss_rate, 2) if summary.current_value else None,
+            average_unit_price=summary.average_unit_price,
+            acquisition_cost=summary.acquisition_cost,
+            current_value=summary.current_value,
+            profit_loss=summary.profit_loss,
+            profit_loss_rate=summary.profit_loss_rate,
         )
         for account_name, summary in summaries.items()
         if summary.total_quantity != 0
     ]
+
+    summary = HoldingSummary(holding, latest_price)
+    entries.append(
+        EntrySchema(
+            account="Total",
+            total_quantity=summary.total_quantity,
+            average_unit_price=summary.average_unit_price,
+            acquisition_cost=summary.acquisition_cost,
+            current_value=summary.current_value,
+            profit_loss=summary.profit_loss,
+            profit_loss_rate=summary.profit_loss_rate,
+        )
+    )
 
     return ResponseDetailSchema(
         id=holding.id,

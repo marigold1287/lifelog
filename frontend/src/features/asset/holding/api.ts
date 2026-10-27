@@ -1,4 +1,4 @@
-import type { View, Input, Response, PriceResponse } from "./types"
+import type { View, Input, Response, PriceResponse, PriceInput } from "./types"
 import { knockApi, knockApiNoContent, parseDate, formatDate } from "@/api"
 
 const baseUrl = "/api/holding"
@@ -7,13 +7,20 @@ export async function getList(): Promise<View[]> {
     return await knockApi<View[]>(baseUrl)
 }
 
+function stringToDate(response: PriceResponse): PriceInput {
+    return {
+        ...response,
+        price_date: parseDate(response.price_date)
+    }
+}
 
 export async function get(id: number | string): Promise<Response> {
     return await knockApi<Response>(`${baseUrl}/${id}`)
 }
 
-export async function getPrices(holding_id: number | string): Promise<PriceResponse[]> {
-    return await knockApi<PriceResponse[]>(`/api/price/holding/${holding_id}`)
+export async function getPrices(holding_id: number | string): Promise<PriceInput[]> {
+    const prices = await knockApi<PriceResponse[]>(`/api/price/holding/${holding_id}`)
+    return prices.map(p => stringToDate(p))
 }
 
 export async function create(holding: Input): Promise<View> {

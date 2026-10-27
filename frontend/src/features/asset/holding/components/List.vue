@@ -2,6 +2,7 @@
     import { onMounted, ref } from "vue"
     import type { View } from "../types.ts"
     import { getList } from "../api.ts"
+    import { formatMoney } from "@/utils/utils"
 
 
     interface Result {
@@ -19,11 +20,10 @@
     const headers = [
         { title: '名称', key: 'name' },
         { title: '銘柄種類', key: 'type' },
-        { title: '総量', key: 'total_quantity' },
         { title: '取得コスト', key: 'acquisition_cost' },
         { title: '現在価値', key: 'current_value' },
         { title: '損益', key: 'profit_loss' },
-        { title: '損益割合', key: 'profit_loss_rate' },
+        { title: '損益割合, %', key: 'profit_loss_rate' },
     ]
 
     const fetchPrices = async () => {
@@ -99,6 +99,10 @@
             :search="search"
             :headers="headers"
         >
+            <template #item.acquisition_cost="{ value }">{{ formatMoney(value) }}</template>
+            <template #item.current_value="{ value }">{{ formatMoney(value) }}</template>
+            <template #item.profit_loss="{ value }">{{ formatMoney(value) }}</template>
+            <template #item.profit_loss_rate="{ value }">{{ value?.toLocaleString() }}</template>
             <template #item.name="{ item }">
                 <RouterLink :to="`holding/${item.id}`">
                     {{ item.name }}
