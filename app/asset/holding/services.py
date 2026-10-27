@@ -2,7 +2,7 @@ from collections import defaultdict
 from .schemas import ResponseDetailSchema, EntrySchema, ResponseSchema
 from app.asset.models import Holding, Price, Entry, AccountType
 from decimal import Decimal
-from dataclasses import dataclass
+from dataclasses import dataclass, InitVar
 
 @dataclass
 class HoldingSummary:
@@ -10,29 +10,20 @@ class HoldingSummary:
     price: Price | None = None
     account_name: str | None = None
 
-    @property
-    def total_quantity(self):
-        total = 0
+    def __post_init__(self):
+        self.total_quantity = 0
+        self.acquisition_cost = 0
         for entry in self.holding.entries:
             if entry.account.type in [AccountType.EXPENSE, AccountType.INCOME, AccountType.EQUITY]:
                 continue
             if self.account_name is None or entry.account.name == self.account_name:
-                total += entry.quantity
-        return total
-
-    @property
-    def acquisition_cost(self):
-        cost = 0
-        for entry in self.holding.entries:
-            if entry.account.type in [AccountType.EXPENSE, AccountType.INCOME, AccountType.EQUITY]:
-                continue
-            if self.account_name is None or entry.account.name == self.account_name:
-                cost += (
+                self.total_quantity += entry.quantity
+                self.acquisition_cost += (
                     entry.quantity
                     * (entry.unit_price or Decimal("1"))
                     / self.holding.price_per_units
                 )
-        return cost
+
 
     @property
     def current_value(self):
