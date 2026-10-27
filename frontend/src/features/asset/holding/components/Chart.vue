@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue"
-import type { PriceResponse } from "../types"
+import type { PriceInput } from "../types"
 import VChart from "vue-echarts"
 
 import { use } from 'echarts/core'
@@ -35,19 +35,19 @@ type EChartsOption = ComposeOption<
 >
 
 const props = defineProps<{
-  data: PriceResponse[]
+  data: PriceInput[]
 }>()
 
 const option = computed<EChartsOption>(() => generateOption(props.data))
 
-function generateOption(data: PriceResponse[],): EChartsOption {
+function generateOption(data: PriceInput[],): EChartsOption {
   return {
     tooltip: {
       trigger: 'axis',
     },
     xAxis: {
       type: 'time',
-      axisLabel: { formatter: '{yyyy}/{MM}/{dd}' },
+      axisLabel: { formatter: '{yy}/{MM}' },
     },
     yAxis: {
       type: 'value',

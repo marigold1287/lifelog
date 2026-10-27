@@ -50,3 +50,8 @@ export interface PriceResponse {
   price_date: string
   price: number
 }
+
+export interface PriceInput {
+  price_date: Date
+  price: number
+}

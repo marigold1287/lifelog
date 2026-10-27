@@ -3,54 +3,29 @@
     import { useRoute, useRouter } from "vue-router"
     import { get, update, remove, getPrices } from "../api.ts"
     import { BASE_URL } from "../router.ts"
-    import type { Input, Response, PriceResponse } from "../types.ts"
+    import type { Input, Response, PriceInput } from "../types.ts"
     import { CustomApiError, getErrorMessage } from "@/api"
+    import { formatMoney } from "@/utils/utils"
     import Form from "./Form.vue"
     import Chart from "./Chart.vue"
 
     const holding = ref<Input | null>(null)
     const response = ref<Response>()
-    const prices = ref<PriceResponse[]>([])
+    const prices = ref<PriceInput[]>([])
     const entries = computed(() => response.value?.entries ?? [])
 
-    const total = computed(() => {
-        const quantity = entries.value.reduce(
-            (sum, item) => sum + item.total_quantity,
-            0
-        )
-
-        const acquisitionCost = entries.value.reduce(
-            (sum, item) => sum + item.acquisition_cost,
-            0
-        )
-
-        const currentValue = entries.value.reduce(
-            (sum, item) => sum + item.current_value,
-            0
-        )
-
-        const pricePerUnits = response.value?.price_per_units ? response.value?.price_per_units : 1
-
-        const averageUnitPrice = quantity > 0 ? acquisitionCost / quantity * pricePerUnits : 0
-
-        const profitLoss = currentValue - acquisitionCost
-
-        return {
-            total_quantity: quantity,
-            average_unit_price: averageUnitPrice,
-            acquisition_cost: acquisitionCost,
-            current_value: currentValue,
-            profit_loss: profitLoss,
-            profit_loss_rate: acquisitionCost
-            ? profitLoss / acquisitionCost * 100
-            : 0,
-        }
-    })
-
-    
     const route = useRoute()
     const router = useRouter()
     const errorMessage = ref("")
+
+    const headers = [
+        { title: '', key: 'account' },
+        { title: '総量', key: 'total_quantity' },
+        { title: '取得コスト', key: 'acquisition_cost' },
+        { title: '現在価値', key: 'current_value' },
+        { title: '損益', key: 'profit_loss' },
+        { title: '損益割合, %', key: 'profit_loss_rate' },
+    ]
 
     async function onSubmitUpdate() {
         if (!holding.value) return;
@@ -83,7 +58,6 @@
         const res = await get(`${route.params.id}`);
         response.value = res;
         prices.value = await getPrices(`${route.params.id}`);
-        console.log(prices.value)
         
         if (res) {
             const { entries, ...formData } = res;
@@ -113,29 +87,13 @@
 
         <v-data-table
             :items="entries"
+            :headers="headers"
         >
-            <template #body.append>
-                <tr class="font-weight-bold">
-                    <td>合計</td>
-                    <td>
-                    {{ total.total_quantity.toLocaleString() }}
-                    </td>
-                    <td>{{ total.average_unit_price.toLocaleString() }}</td>
-                    <td>
-                    {{ total.acquisition_cost.toLocaleString() }}
-                    </td>
-                    <td>―</td>
-                    <td>
-                    {{ total.current_value.toLocaleString() }}
-                    </td>
-                    <td>
-                    {{ total.profit_loss.toLocaleString() }}
-                    </td>
-                    <td>
-                    {{ total.profit_loss_rate.toFixed(2) }}%
-                    </td>
-                </tr>
-            </template>
+            <template #item.average_unit_price="{ value }">{{ formatMoney(value) }}</template>
+            <template #item.acquisition_cost="{ value }">{{ formatMoney(value) }}</template>
+            <template #item.current_value="{ value }">{{ formatMoney(value) }}</template>
+            <template #item.profit_loss="{ value }">{{ formatMoney(value) }}</template>
+            <template #item.profit_loss_rate="{ value }">{{ value?.toLocaleString() }}</template>
         </v-data-table>
     </div>
 

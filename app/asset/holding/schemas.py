@@ -39,7 +39,7 @@ class ResponseDetailSchema(BaseModel):
 class EntrySchema(BaseModel):
     account: str
     total_quantity: float
-    average_unit_price: float
+    average_unit_price: float | None
     acquisition_cost: float
     current_value: float | None
     profit_loss: float | None
