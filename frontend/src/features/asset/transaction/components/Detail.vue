@@ -46,7 +46,11 @@
 </script>
 
 <template>
+    <h1>編集フォーム</h1>
     <div v-if="transaction">
+        <RouterLink :to="`/transaction/add?transaction_id=${route.params.id}`">
+        <v-btn>複写する</v-btn>
+        </RouterLink>
         <Form 
             v-model="transaction"
             :id="`${route.params.id}`"

@@ -18,7 +18,7 @@ export type TxType =
 // Form用
 export interface TransactionDraft {
   trade_date: Date
-  type: TxType | null
+  type: TxType
   shop: string | null
   note: string | null
   entries: EntryDraft[]

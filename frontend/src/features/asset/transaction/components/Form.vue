@@ -1,7 +1,7 @@
 <script setup lang="ts">
     import { onMounted, ref, watch, computed } from "vue"
-    import { validateStringEntered } from "@/validator"
-    import type { TransactionDraft, EntryDraft } from "../types"
+    import { useRoute } from 'vue-router'
+    import type { TransactionDraft, EntryDraft, TxType } from "../types"
     import { getTransactionTypeList } from "../api";
     import type { View as accountView, AccountType } from "@/features/asset/account/types";
     import { getLeafList } from "@/features/asset/account/api";
@@ -14,7 +14,6 @@
     const holdings = ref<holdingView[]>([])
 
     const yenHolding = computed(() => holdings.value.find(h => h.name === '円'))
-    const isExpense = computed(() => transaction.value.type === 'expense')
 
     const props = withDefaults(defineProps<{
         submitButtonLabel?: string
@@ -25,13 +24,8 @@
         errorMessage: "",
     })
 
-    const EXPENSE_ACCOUNT_TYPES: AccountType[] = ["bank", "cash", "equity", "expense", "card"]
-
     const accountOptions = computed(() => {
-        const list = isExpense.value
-            ? accounts.value.filter(a => EXPENSE_ACCOUNT_TYPES.includes(a.type))
-            : accounts.value
-        return [...list].sort((a, b) =>
+        return [...accounts.value].sort((a, b) =>
             a.type.localeCompare(b.type) ||
             a.label.localeCompare(b.label, "ja")
         )
@@ -46,10 +40,14 @@
     )
 
     function addItem() {
-        const yen = isExpense.value ? yenHolding.value : undefined
+        const yen = ["income", "expense", "transfer"].includes(transaction.value.type) ? yenHolding.value : undefined
+        let account_id = null;
+        if (transaction.value.entries.at(-1) !== undefined) {
+            account_id = transaction.value.entries.at(-1)?.account_id || null
+        }
         transaction.value.entries.push({
             id: null,
-            account_id: null,
+            account_id: account_id,
             holding_id: yen?.id ?? null,
             quantity: null,
             unit_price: yen ? 1 : null,
@@ -58,53 +56,16 @@
         })
     }
 
-    const isYen = (item: EntryDraft) => holdings.value.find(h => h.id === item.holding_id)?.name === '円'
-
-    watch(
-        () => transaction.value.entries.map(e => e.holding_id),
-        (newIds, oldIds) => {
-            transaction.value.entries.forEach((e, i) => {
-            if (newIds[i] === oldIds?.[i]) return // holding_idが変わっていない行は触らない
-            e.unit_price = isYen(e) ? 1 : null
-            })
-        }
-    )
-
-
-    // expense のとき、既存の全 entry を円に揃える
-    // ・type が expense に変わったとき
-    // ・holdings の取得が終わって yenHolding が確定したとき（初期値が expense の場合はこちら）
-    watch(
-        [isExpense, yenHolding],
-        ([expense, yen]) => {
-            if (!expense || !yen) return
-            transaction.value.entries.forEach(e => {
-                e.holding_id = yen.id
-            })
-        },
-        { immediate: true }
-    )
-    
-    watch(
-        [() => transaction.value.entries.map(e => e.holding_id), holdings],
-        () => {
-            console.log("holding_id:", transaction.value.entries.map(e => ({
-                value: e.holding_id,
-                type: typeof e.holding_id,
-            })))
-            console.log("holdings:", holdings.value.map(h => ({
-                id: h.id,
-                type: typeof h.id,
-                name: h.name,
-            })))
-        },
-        { immediate: true }
-    )
-        
-
-
     function removeItem(index: number) {
         transaction.value.entries.splice(index, 1)
+    }
+
+
+    function onAccountInput(value: accountView | string | null, index: number) {
+        const selected = accounts.value.find(a => a.label == value)
+        if (typeof selected !== "undefined" && typeof transaction.value.entries[index] !== "undefined") {
+            transaction.value.entries[index].account_id = selected.id;
+        }
     }
 
 
@@ -127,7 +88,17 @@
         types.value = await getTransactionTypeList();
         accounts.value = await getLeafList();
         holdings.value = await getHoldingList();
+        if (transaction.value.entries.length == 0) {
+            addItem()
+        }
+        if (transaction.value.entries.length == 0) {
+            addItem()
+        }
     })
+
+    function isInputted(value: any): boolean {
+        return value ? true : false
+    }
 
 </script>
 
@@ -170,23 +141,24 @@
         >
             <v-autocomplete
                 v-model="item.account_id"
+                :tabindex="isInputted(item.account_id) ? -1 : undefined"
                 :items="accountOptions"
                 item-title="label"
                 item-value="id"
                 label="勘定項目"
                 density="compact"
+                @update:search="(query) => onAccountInput(query, index)"
             />
             <v-autocomplete
-                v-if="transaction.type != 'expense'"
                 v-model="item.holding_id"
                 :items="holdings"
+                :tabindex="isInputted(item.holding_id) ? -1 : undefined"
                 item-title="name"
                 item-value="id"
                 label="銘柄"
                 density="compact"
             />
             <v-text-field
-                v-if="isYen(item)"
                 v-model="item.item_name"
                 label="品名"
                 density="compact"
@@ -196,18 +168,16 @@
                 label="数量 or 価格"
                 density="compact"
                 control-variant="hidden"
-
             />
             <v-number-input
-                v-if="!isYen(item)"
                 v-model="item.unit_price"
                 label="株価 or 基準価額"
+                :tabindex="isInputted(item.unit_price) ? -1 : undefined"
                 density="compact"
                 :precision="2"
                 :step="0.01"
                 :min="0"
                 control-variant="hidden"
-
             />
             <v-text-field
                 v-model="item.memo"
@@ -218,6 +188,7 @@
             <v-btn
                 icon="mdi-delete"
                 variant="text"
+                tabindex="-1"
                 @click="removeItem(index)"
             />
         </div>

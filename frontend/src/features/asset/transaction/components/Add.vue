@@ -3,26 +3,20 @@
     import type { TransactionInput, TransactionDraft } from "../types.ts"
     import { create } from "../api.ts"
     import { getErrorMessage } from "@/api"
+    import { get } from "../api.ts"
     import Form from "./Form.vue"
-    import { useRouter } from "vue-router"
+    import { useRouter, useRoute } from "vue-router"
 
     const errorMessage = ref("")
     const router = useRouter()
+    const route = useRoute()
 
     const transaction = ref<TransactionDraft>({
         trade_date: new Date(),
-        type: "expense",
+        type: 'expense',
         shop: null,
         note: null,
-        entries: [{
-            id: null,
-            account_id: null,
-            holding_id: null,
-            quantity: null,
-            unit_price: null,
-            item_name: null,
-            memo: null,
-        }]
+        entries: []
     })
 
     async function onSubmit() {
@@ -37,9 +31,24 @@
             errorMessage.value = getErrorMessage(error)
         }
     }
+
+    onMounted(async () => {
+        const transactionId = route.query.transaction_id;
+
+        if (transactionId && !isNaN(Number(transactionId))) {
+            const copySource = await get(Number(transactionId))
+            if (copySource !== null) {
+                transaction.value = {
+                    ...copySource,
+                    trade_date: new Date()
+                }
+            }
+        } 
+    })
 </script>
 
 <template>
+    <h1>登録フォーム</h1>
     <Form 
         v-model="transaction"
         @submit="onSubmit"

@@ -574,49 +574,49 @@
         "children": [
             {
                 "name": "給与所得",
-                "type": "expense",
+                "type": "income",
                 "currency": "JPY",
                 "sort_order": 0
             },
             {
                 "name": "賞与",
-                "type": "expense",
+                "type": "income",
                 "currency": "JPY",
                 "sort_order": 1
             },
             {
                 "name": "臨時収入",
-                "type": "expense",
+                "type": "income",
                 "currency": "JPY",
                 "sort_order": 2
             },
             {
                 "name": "立替金返済",
-                "type": "expense",
+                "type": "income",
                 "currency": "JPY",
                 "sort_order": 3
             },
             {
                 "name": "配当金(上場)",
-                "type": "expense",
+                "type": "income",
                 "currency": "JPY",
                 "sort_order": 4
             },
             {
                 "name": "配当金(非上場)",
-                "type": "expense",
+                "type": "income",
                 "currency": "JPY",
                 "sort_order": 5
             },
             {
                 "name": "雑所得",
-                "type": "expense",
+                "type": "income",
                 "currency": "JPY",
                 "sort_order": 6
             },
             {
                 "name": "その他",
-                "type": "expense",
+                "type": "income",
                 "currency": "JPY",
                 "sort_order": 7
             }
