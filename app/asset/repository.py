@@ -277,6 +277,10 @@ class KakeiboRepository:
                 Entry.unit_price,
                 Entry.memo,
             )
+            .where(
+                Transaction.trade_date >= start_date,
+                Transaction.trade_date < end_date,
+            )
             .join(Entry, Entry.transaction_id == Transaction.id)
             .join(Account, Entry.account_id == Account.id)
             .join(Holding, Entry.holding_id == Holding.id)
