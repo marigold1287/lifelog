@@ -14,9 +14,14 @@
 
     const summary = ref<AccountSummary | null>(null)
     const entries = ref<EntryResponse[]>([])
+    const kakeiboEntries = ref<EntryResponse[]>([])
+    const transferEntries = ref<EntryResponse[]>([])
+    const tradingEntries = ref<EntryResponse[]>([])
     const loading = ref(false)
     const error = ref("")
-    const search = ref('')
+    const kakeiboSearch = ref('')
+    const transferSearch = ref('')
+    const tradingSearch = ref('')
 
     const header = [
         { title: '取引日', key: 'trade_date' },
@@ -28,6 +33,14 @@
         { title: '価格', key: 'quantity' },
         { title: 'メモ', key: 'memo' },
     ]
+    const tradingHeader = [
+        { title: '取引日', key: 'trade_date' },
+        { title: '店', key: 'shop' },
+        { title: '銘柄', key: 'holding' },
+        { title: '価格', key: 'quantity' },
+        { title: '基準価額', key: 'unit_price' },
+    ]
+
 
     const years = computed(() =>
       Array.from(
@@ -62,8 +75,9 @@
             if (id === requestId) {
                 summary.value = result
                 entries.value = entry_result
-
-                console.log(entries.value)
+                kakeiboEntries.value = entry_result.filter(e => e.account_type == "income" || e.account_type == "expense");
+                transferEntries.value = entry_result.filter(e => e.transaction_type == "transfer" && e.quantity > 0)
+                tradingEntries.value = entry_result.filter(e => e.holding_type == "fund" || e.holding_type == "stock")
             }
         } catch (e) {
                 if (id === requestId) {
@@ -91,8 +105,9 @@
     <header class="page-header">
       <div>
         <h1>家計簿</h1>
+
         <RouterLink :to="'/transaction/add'">
-          <v-btn>Add New</v-btn>
+        <v-btn>Add New</v-btn>
         </RouterLink>
         <p class="subtitle">収支のサマリー</p>
       </div>
@@ -166,10 +181,10 @@
       </section>
 
 
-      <v-card title="取引一覧" flat>
+      <v-card title="支出/収入一覧" flat>
         <template #text>
           <v-text-field
-            v-model="search"
+            v-model="kakeiboSearch"
             label="Search"
             prepend-inner-icon="mdi-magnify"
             variant="outlined"
@@ -179,8 +194,8 @@
         </template>
 
         <v-data-table
-          :items="entries"
-          :search="search"
+          :items="kakeiboEntries"
+          :search="kakeiboSearch"
           :headers="header"
         >
           <template #item.trade_date="{ item }">
@@ -192,6 +207,64 @@
           <template #item.quantity="{ value }">{{ formatMoney(value) }}</template>
         </v-data-table>
       </v-card>
+
+
+      <v-card title="振替一覧" flat>
+        <template #text>
+          <v-text-field
+            v-model="transferSearch"
+            label="Search"
+            prepend-inner-icon="mdi-magnify"
+            variant="outlined"
+            hide-details
+            single-line
+          />
+        </template>
+
+        <v-data-table
+          :items="transferEntries"
+          :search="transferSearch"
+          :headers="header"
+        >
+          <template #item.trade_date="{ item }">
+            <RouterLink :to="`/transaction/${item.transaction_id}`">
+              {{ item.trade_date }}
+            </RouterLink>
+          </template>
+
+          <template #item.quantity="{ value }">{{ formatMoney(value) }}</template>
+        </v-data-table>
+      </v-card>
+
+
+      <v-card title="株式取引一覧" flat>
+        <template #text>
+          <v-text-field
+            v-model="tradingSearch"
+            label="Search"
+            prepend-inner-icon="mdi-magnify"
+            variant="outlined"
+            hide-details
+            single-line
+          />
+        </template>
+
+        <v-data-table
+          :items="tradingEntries"
+          :search="tradingSearch"
+          :headers="tradingHeader"
+        >
+          <template #item.trade_date="{ item }">
+            <RouterLink :to="`/transaction/${item.transaction_id}`">
+              {{ item.trade_date }}
+            </RouterLink>
+          </template>
+
+          <template #item.quantity="{ value }">{{ formatMoney(value) }}</template>
+          <template #item.unit_price="{ value }">{{ formatMoney(value) }}</template>
+        </v-data-table>
+      </v-card>
+
 
     </template>
   </main>

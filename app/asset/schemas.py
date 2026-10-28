@@ -21,11 +21,15 @@ class AssetResponseSchema(BaseModel):
 
 class EntryResponseSchema(BaseModel):
     transaction_id: int
+    transaction_type: str
     trade_date: dt.date
     shop: str | None
     note: str | None
     account: str
+    account_type: str
     holding: str
+    holding_type: str
     item_name: str | None
     quantity: Qty
+    unit_price: Qty | None
     memo: str | None

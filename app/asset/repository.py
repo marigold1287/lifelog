@@ -265,49 +265,25 @@ class KakeiboRepository:
             select(
                 Transaction.id.label("transaction_id"),
                 Transaction.trade_date,
+                Transaction.type.label("transaction_type"),
                 Transaction.shop,
                 Transaction.note,
                 Account.label.label("account"),
+                Account.type.label("account_type"),
                 Holding.name.label("holding"),
+                Holding.type.label("holding_type"),
                 Entry.item_name,
                 Entry.quantity,
+                Entry.unit_price,
                 Entry.memo,
             )
             .join(Entry, Entry.transaction_id == Transaction.id)
             .join(Account, Entry.account_id == Account.id)
             .join(Holding, Entry.holding_id == Holding.id)
-            .where(
-                Transaction.trade_date >= start_date,
-                Transaction.trade_date < end_date,
-                or_(
-                    Account.type.in_([
-                    AccountType.EXPENSE,
-                    AccountType.INCOME,
-                ]),
-                    # Holding.type.in_([
-                    #     HoldingType.FUND,
-                    #     HoldingType.STOCK,
-                    # ])
-                )
-            )
             .order_by(Transaction.trade_date)
         )
         rows = self.session.execute(query).all()
         return [EntryResponseSchema(**row._mapping) for row in rows]
-
-
-    def _to_entry_response(self, transaction: Transaction, entry: Entry):
-        return EntryResponseSchema(
-            transaction_id=transaction.id,
-            trade_date=transaction.trade_date,
-            shop=transaction.shop,
-            note=transaction.note,
-            account=entry.account.label,
-            holding=entry.holding.name,
-            item_name=entry.item_name,
-            quantity=entry.quantity,
-            memo=entry.memo,
-        )
 
 
     def _parse_start_end_date(self, year: int | None, month: int | None=None):
