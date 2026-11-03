@@ -1,4 +1,4 @@
-import type { View, Input, Response, PriceResponse, PriceInput } from "./types"
+import type { View, Input, DetailResponse, PriceResponse, PriceInput, EntryView } from "./types"
 import { knockApi, knockApiNoContent, parseDate, formatDate } from "@/api"
 
 const baseUrl = "/api/holding"
@@ -14,8 +14,12 @@ function stringToDate(response: PriceResponse): PriceInput {
     }
 }
 
-export async function get(id: number | string): Promise<Response> {
-    return await knockApi<Response>(`${baseUrl}/${id}`)
+export async function get(id: number | string): Promise<DetailResponse> {
+    return await knockApi<DetailResponse>(`${baseUrl}/${id}`)
+}
+
+export async function getAccountSummaries(id: number | string): Promise<EntryView[]> {
+    return await knockApi<EntryView[]>(`${baseUrl}/${id}/summary`)
 }
 
 export async function getPrices(holding_id: number | string): Promise<PriceInput[]> {

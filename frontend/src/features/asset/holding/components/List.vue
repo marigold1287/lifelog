@@ -98,6 +98,7 @@
             :items="holdings"
             :search="search"
             :headers="headers"
+            :sort-by="[{key: 'type'}, {key: 'name'}]"
         >
             <template #item.acquisition_cost="{ value }">{{ formatMoney(value) }}</template>
             <template #item.current_value="{ value }">{{ formatMoney(value) }}</template>

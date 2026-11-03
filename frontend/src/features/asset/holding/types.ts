@@ -3,14 +3,13 @@ export type HoldingType =
   | "fund"
   | "stock"
 
-  export interface Response {
+  export interface DetailResponse {
   name: string
   type: HoldingType
   symbol: string | null
   currency: string
   price_source: string | null
   price_per_units: number
-  entries: EntryView[]
 }
 
   export interface Input {

@@ -1,19 +1,69 @@
 from sqlalchemy.orm import Session, selectinload
-from sqlalchemy import select
+from sqlalchemy import select, func
 from app.db import safe_commit, NotFoundError
-from app.asset.models import Holding, Entry
-from .schemas import InputSchema
+from app.asset.models import Holding, Entry, Account, AccountType
+from .schemas import InputSchema, AccountSummarySchema
 
 def get_list(session: Session) -> list[Holding]:
     stmt = select(Holding)
     return session.execute(stmt).scalars().all()
 
+def get_holding_summaries(session: Session):
+    return session.execute(
+        select(
+            Holding.id,
+            Holding.name,
+            Holding.type,
+            Holding.symbol,
+            Holding.price_per_units,
+            func.sum(Entry.quantity).label("total_quantity"),
+            func.sum(Entry.quantity * Entry.unit_price / Holding.price_per_units).label("acquisition_cost"),
+        )
+        .join(Holding, Entry.holding_id == Holding.id)
+        .join(Account, Entry.account_id == Account.id)
+        .where(
+            Account.type.notin_(
+                [AccountType.EXPENSE,
+                AccountType.INCOME,
+                AccountType.EQUITY,]
+            )
+        )
+        .group_by(
+            Holding.id,
+            Holding.name,
+            Holding.type,
+            Holding.symbol,
+            Holding.price_per_units,
+        )
+    ).mappings().all()
+
+def get_account_summaries(session: Session, key: int) -> list[AccountSummarySchema]:
+    return session.execute(
+        select(
+            Account.name,
+            Holding.price_per_units,
+            func.sum(Entry.quantity).label("total_quantity"),
+            func.sum(Entry.quantity * Entry.unit_price / Holding.price_per_units).label("acquisition_cost"),
+        )
+        .join(Holding, Entry.holding_id == Holding.id)
+        .join(Account, Entry.account_id == Account.id)
+        .where(
+            Account.type.notin_(
+                [AccountType.EXPENSE,
+                AccountType.INCOME,
+                AccountType.EQUITY,]
+            ),
+            Holding.id == key,
+        )
+        .group_by(
+            Holding.price_per_units,
+            Account.name,
+        )
+    ).mappings().all()
+
 def get(session: Session, key: int) -> Holding:
     holding = session.execute(
-        select(Holding).options(
-            selectinload(Holding.entries).selectinload(Entry.transaction),
-            selectinload(Holding.entries).selectinload(Entry.account),
-        )
+        select(Holding)
         .where(Holding.id == key)
     ).scalars().first()
 
