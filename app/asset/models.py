@@ -209,7 +209,7 @@ class Entry(Base):
     account_id: Mapped[int] = mapped_column(ForeignKey("account.id"))
     holding_id: Mapped[int] = mapped_column(ForeignKey("holding.id"))
     quantity: Mapped[Decimal] = mapped_column(Numeric(20, 6))
-    unit_price: Mapped[Decimal | None] = mapped_column(Numeric(20, 6))
+    unit_price: Mapped[Decimal] = mapped_column(Numeric(20, 6), default=Decimal("1.0"))
     item_name: Mapped[str | None] = mapped_column(String(200))  # きゃべつ、ヨーグルトなど
     memo: Mapped[str | None] = mapped_column(String(500))
 

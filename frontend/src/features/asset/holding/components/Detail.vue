@@ -1,18 +1,18 @@
 <script setup lang="ts">
-    import { onMounted, ref, watch, computed } from "vue"
+    import { onMounted, ref } from "vue"
     import { useRoute, useRouter } from "vue-router"
-    import { get, update, remove, getPrices } from "../api.ts"
+    import { get, update, remove, getPrices, getAccountSummaries } from "../api.ts"
     import { BASE_URL } from "../router.ts"
-    import type { Input, Response, PriceInput } from "../types.ts"
+    import type { Input, DetailResponse, PriceInput, EntryView } from "../types.ts"
     import { CustomApiError, getErrorMessage } from "@/api"
     import { formatMoney } from "@/utils/utils"
     import Form from "./Form.vue"
     import Chart from "./Chart.vue"
 
     const holding = ref<Input | null>(null)
-    const response = ref<Response>()
+    const response = ref<DetailResponse>()
     const prices = ref<PriceInput[]>([])
-    const entries = computed(() => response.value?.entries ?? [])
+    const entries = ref<EntryView[]>([])
 
     const route = useRoute()
     const router = useRouter()
@@ -55,16 +55,11 @@
     }
 
     onMounted(async () => {
-        const res = await get(`${route.params.id}`);
-        response.value = res;
+        holding.value = await get(`${route.params.id}`);
+        entries.value = await getAccountSummaries(`${route.params.id}`);
         prices.value = await getPrices(`${route.params.id}`);
-        
-        if (res) {
-            const { entries, ...formData } = res;
-            holding.value = formData;
-            console.log(entries)
-        }
     })
+        
 </script>
 
 <template>

@@ -8,12 +8,28 @@ class ResponseSchema(BaseModel):
     name: str
     type: HoldingType
     symbol: str | None
+    price_per_units: int
     total_quantity: int
     acquisition_cost: float
     current_value: float | None
     profit_loss: float | None
     profit_loss_rate: float | None
+
+
+class HoldingSummarySchema(BaseModel):
+    id: int
+    name: str
+    type: HoldingType
+    symbol: str | None
     price_per_units: int
+    total_quantity: int
+    acquisition_cost: float
+
+class AccountSummarySchema(BaseModel):
+    name: str
+    price_per_units: int
+    total_quantity: int
+    acquisition_cost: float
 
 
 class InputSchema(BaseModel):
@@ -32,8 +48,6 @@ class ResponseDetailSchema(BaseModel):
     currency: str
     price_source: str | None
     price_per_units: int
-    current_unit_price: float | None
-    entries: list["EntrySchema"]
 
 
 class EntrySchema(BaseModel):
