@@ -1,5 +1,5 @@
 import type { WorkView, WorkInput, WorkResponse } from "./types"
-import { knockApi, parseDate, formatDate } from "@/api"
+import { knockApi, parseDate, formatDate, knockApiNoContent } from "@/api"
 
 const BASE_URL = "/api/work"
 
@@ -70,7 +70,7 @@ export async function getWorks(id: number | string) {
 }
 
 export async function remove(id: number | string) {
-    return await knockApi<null>(
+    return await knockApiNoContent(
         `${BASE_URL}/${id}`,
         {
             method: "DELETE",
