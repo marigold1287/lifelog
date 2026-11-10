@@ -84,13 +84,12 @@
         emit("submit")
     }
 
+    const required = (v: unknown) => (v !== null && v !== '' && v !== undefined) || '必須です'
+
     onMounted(async () => {
         types.value = await getTransactionTypeList();
         accounts.value = await getLeafList();
         holdings.value = await getHoldingList();
-        if (transaction.value.entries.length == 0) {
-            addItem()
-        }
         if (transaction.value.entries.length == 0) {
             addItem()
         }
@@ -141,21 +140,23 @@
         >
             <v-autocomplete
                 v-model="item.account_id"
+                :rules="[required]"
                 :tabindex="isInputted(item.account_id) ? -1 : undefined"
                 :items="accountOptions"
                 item-title="label"
                 item-value="id"
-                label="勘定項目"
+                label="勘定項目*"
                 density="compact"
                 @update:search="(query) => onAccountInput(query, index)"
             />
             <v-autocomplete
                 v-model="item.holding_id"
+                :rules="[required]"
                 :items="holdings"
                 :tabindex="isInputted(item.holding_id) ? -1 : undefined"
                 item-title="name"
                 item-value="id"
-                label="銘柄"
+                label="銘柄*"
                 density="compact"
             />
             <v-text-field
@@ -165,13 +166,15 @@
             />
             <v-number-input
                 v-model="item.quantity"
-                label="数量 or 価格"
+                :rules="[required]"
+                label="数量 or 価格*"
                 density="compact"
                 control-variant="hidden"
             />
             <v-number-input
                 v-model="item.unit_price"
-                label="株価 or 基準価額"
+                :rules="[required]"
+                label="株価 or 基準価額*"
                 :tabindex="isInputted(item.unit_price) ? -1 : undefined"
                 density="compact"
                 :precision="2"
