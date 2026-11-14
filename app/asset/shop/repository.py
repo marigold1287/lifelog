@@ -10,7 +10,7 @@ def get_list(session: Session) -> list[Shop]:
     return session.execute(stmt).scalars().all()
 
 def get_shop_name_list(session: Session):
-    stmt = select(Transaction.shop).where(Transaction.shop.is_not(None)).distinct().order_by(Transaction.shop)
+    stmt = select(Transaction.shop).where(Transaction.shop.is_not(None)).distinct().order_by(Transaction.trade_date.desc())
 
     return session.execute(stmt).scalars().all()
 
