@@ -242,6 +242,7 @@ class Shop(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
+    yomigana: Mapped[str | None] = mapped_column()  # Sortに使う
     parent_id: Mapped[int | None] = mapped_column(ForeignKey("shop.id"))
 
 
