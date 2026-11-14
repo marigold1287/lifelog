@@ -7,6 +7,7 @@ from .account import account_router
 from .holding import holding_router
 from .transaction import transaction_router
 from .price import price_router
+from .shop import shop_router
 from .repository import AssetRepository, KakeiboRepository
 from datetime import date
 
@@ -19,6 +20,7 @@ router.include_router(account_router)
 router.include_router(holding_router)
 router.include_router(transaction_router)
 router.include_router(price_router)
+router.include_router(shop_router)
 
 
 # from .services import get_wide

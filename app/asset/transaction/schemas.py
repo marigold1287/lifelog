@@ -35,15 +35,52 @@ class EntryResponseSchema(BaseModel):
     item_name: str | None = Field(default=None, max_length=200)
     memo: str | None = Field(default=None, max_length=500)
 
+class TransactionValidatorMixin:
+    @field_validator("shop")
+    @classmethod
+    def validate_shop(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
 
-class InputSchema(BaseModel):
+        return value.strip()
+
+    @field_validator("note")
+    @classmethod
+    def validate_note(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+
+        return value.strip()
+
+
+
+class InputSchema(TransactionValidatorMixin, BaseModel):
     trade_date: dt.date
     type: TxType
     shop: str | None
     note: str | None
     entries: list["EntryInputSchema"]
 
-class EntryInputSchema(BaseModel):
+class EntryValidatorMixin:
+    @field_validator("item_name")
+    @classmethod
+    def validate_item_name(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+
+        return value.strip()
+
+    @field_validator("memo")
+    @classmethod
+    def validate_memo(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+
+        return value.strip()
+
+
+
+class EntryInputSchema(EntryValidatorMixin, BaseModel):
     id: int | None = None
     account_id: int
     holding_id: int

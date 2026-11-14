@@ -185,6 +185,7 @@ class Transaction(Base):
     trade_date: Mapped[date] = mapped_column(Date)
     type: Mapped[TxType] = mapped_column(_enum(TxType, "tx_type"))
     shop: Mapped[str | None] = mapped_column(String(100))  # 将来は shop_id に置き換える余地あり
+    shop_id: Mapped[int | None] = mapped_column(ForeignKey("shop.id"))
     note: Mapped[str | None] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -193,6 +194,8 @@ class Transaction(Base):
     entries: Mapped[list[Entry]] = relationship(
         back_populates="transaction", cascade="all, delete-orphan"
     )
+
+    shop_link: Mapped[Shop] = relationship(back_populates="transactions")
 
     __table_args__ = (Index("ix_transactions_trade_date", "trade_date"),)
 
@@ -233,6 +236,36 @@ class Price(Base):
     source: Mapped[str] = mapped_column(String(50), default="api")  # api / manual
 
     holding: Mapped[Holding] = relationship(back_populates="prices")
+
+class Shop(Base):
+    __tablename__ = "shop"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column()
+    yomigana: Mapped[str | None] = mapped_column()  # Sortに使う
+    parent_id: Mapped[int | None] = mapped_column(ForeignKey("shop.id"))
+
+
+    transactions: Mapped[list[Transaction]] = relationship(back_populates="shop_link")
+    aliases: Mapped[list[ShopAlias]] = relationship(back_populates="shop")
+
+    __table_args__ = (
+        UniqueConstraint("parent_id", "name"),
+    )
+
+class ShopAlias(Base):
+    __tablename__ = "shop_alias"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    shop_id: Mapped[int] = mapped_column(ForeignKey("shop.id"))
+    alias: Mapped[str] = mapped_column()
+
+
+    shop: Mapped[Shop] = relationship(back_populates="aliases")
+
+    __table_args__ = (
+        UniqueConstraint("shop_id", "alias"),
+    )
 
 
 # ---------------------------------------------------------------------------

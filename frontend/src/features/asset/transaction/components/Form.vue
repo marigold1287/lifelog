@@ -7,11 +7,15 @@
     import { getLeafList } from "@/features/asset/account/api";
     import type { View as holdingView } from "@/features/asset/holding/types";
     import { getList as getHoldingList } from "@/features/asset/holding/api";
+    import type { ShopInput, ShopView } from "@/features/asset/shop/types"
+    import { getList as getShopList, getNameList} from "@/features/asset/shop/api"
 
     const transaction = defineModel<TransactionDraft>({ required: true });
     const types = ref<string[]>()
     const accounts = ref<accountView[]>([])
     const holdings = ref<holdingView[]>([])
+    const shops = ref<ShopView[]>([])
+    const shopNames = ref<string[]>([])
 
     const yenHolding = computed(() => holdings.value.find(h => h.name === '円'))
 
@@ -69,6 +73,24 @@
     }
 
 
+    function onShopChanged(item: string | null, shop: ShopInput | string) {
+        if (typeof shop === "string") {
+            transaction.value.shop = shops.value.find(s => s.label == shop)?.name ?? shop
+        }
+        if (typeof shop === "string") {
+            transaction.value.shop = shop
+            // item.id = null
+        } else if (shop === null) {
+            transaction.value.shop = null
+            // item.id = null
+        }  else {
+            transaction.value.shop = shop.name
+            // item.id = shop.id
+        }
+    }
+
+
+
     const emit = defineEmits<{
         submit: []
     }>()
@@ -84,13 +106,14 @@
         emit("submit")
     }
 
+    const required = (v: unknown) => (v !== null && v !== '' && v !== undefined) || '必須です'
+
     onMounted(async () => {
         types.value = await getTransactionTypeList();
         accounts.value = await getLeafList();
         holdings.value = await getHoldingList();
-        if (transaction.value.entries.length == 0) {
-            addItem()
-        }
+        shops.value = await getShopList();
+        shopNames.value = await getNameList();
         if (transaction.value.entries.length == 0) {
             addItem()
         }
@@ -117,9 +140,12 @@
             density="compact"
         />
         <h2>取引店</h2>
-        <v-text-field
+        <v-combobox
             v-model="transaction.shop"
+            autocomplete="off"
+            :items="shopNames"
             density="compact"
+            hide-details
         />
         <h2>ノート</h2>
         <v-text-field
@@ -141,21 +167,23 @@
         >
             <v-autocomplete
                 v-model="item.account_id"
+                :rules="[required]"
                 :tabindex="isInputted(item.account_id) ? -1 : undefined"
                 :items="accountOptions"
                 item-title="label"
                 item-value="id"
-                label="勘定項目"
+                label="勘定項目*"
                 density="compact"
                 @update:search="(query) => onAccountInput(query, index)"
             />
             <v-autocomplete
                 v-model="item.holding_id"
+                :rules="[required]"
                 :items="holdings"
                 :tabindex="isInputted(item.holding_id) ? -1 : undefined"
                 item-title="name"
                 item-value="id"
-                label="銘柄"
+                label="銘柄*"
                 density="compact"
             />
             <v-text-field
@@ -165,13 +193,15 @@
             />
             <v-number-input
                 v-model="item.quantity"
-                label="数量 or 価格"
+                :rules="[required]"
+                label="数量 or 価格*"
                 density="compact"
                 control-variant="hidden"
             />
             <v-number-input
                 v-model="item.unit_price"
-                label="株価 or 基準価額"
+                :rules="[required]"
+                label="株価 or 基準価額*"
                 :tabindex="isInputted(item.unit_price) ? -1 : undefined"
                 density="compact"
                 :precision="2"
